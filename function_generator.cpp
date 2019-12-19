@@ -80,6 +80,12 @@ void function_generator::set_init(std::size_t level){
 }
 void function_generator::resize_floor(std::size_t depth, std::size_t elems){
     current[depth].resize(elems);
+    if(elems == size){
+        completed_levels.insert(depth);
+    }
+    else{
+        completed_levels.erase(depth);
+    }
     for(int j = 0; j < current[depth].size(); ++j){
         //bottom_size sin calcular. 
         //Aproximamos por 2*elems (factible pero incorrecto).
