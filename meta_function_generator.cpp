@@ -18,7 +18,8 @@ meta_function_generator::meta_function_generator
 }
 
 void meta_function_generator::advance(){
-    if(depth == 1 || pow(2,depth-2) < size + 1){
+    //que hace lo d la dcha?
+    if(depth == 1 || depth - 2 <= ceil(log2(size + 1))){
         depth = size + depth;
         size = 1;
     }

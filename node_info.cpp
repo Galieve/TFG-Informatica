@@ -72,6 +72,7 @@ node_info node_info::get_default(int level, int depth, int bottom_size, int top_
         n.data_type.info_gate.left = {level + 1, 0};
         n.data_type.info_gate.right = {level + 1, 0};
         n.data_type.info_gate.c = '&';
+        n.logic_gate = true;
     }
     else{
         n.data_type.pos = 0;

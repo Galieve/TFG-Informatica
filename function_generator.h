@@ -2,7 +2,8 @@
 #ifndef FUNCTION_GENERATOR_H
 #define FUNCTION_GENERATOR_H
 #include <utility>
-#include <vector> 
+#include <vector>
+#include <unordered_set> 
 #ifndef NODE_INFO_H
     #include "node_info.h"
 #endif
@@ -22,6 +23,8 @@ protected:
     std::vector<std::vector<node_info>> current;
 
     std::vector<std::vector<std::size_t>> occurrences;
+
+    std::unordered_set<int> completed_levels;
 
 public:
 
@@ -75,6 +78,10 @@ protected:
     void add_node(std::size_t level); //
 
     void resize_node_level(std::size_t level); //
+
+    void complete_last_floors(std::size_t level);
+
+    void resize_floor(std::size_t level, std::size_t elems);
 
 };
 

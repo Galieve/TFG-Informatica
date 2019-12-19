@@ -2,15 +2,34 @@
 #include <cassert>
 #include <set>
 #include <cmath>
+#include <sstream>
+#include <exception>
 
 function_generator::function_generator(std::size_t depth, std::size_t size, std::size_t input_size)
     : depth(depth), max_depth(depth), input_size(input_size), size(size){
     occurrences.resize(depth - 1,std::vector<std::size_t>(1,0));
     current.resize(depth);
-    for(int i = 0; i < depth - 1; ++i){
-        current[i].push_back(node_info::get_default(i,depth,1,1));
+    std::size_t s = size;
+    resize_floor(current.size() - 1,ceil(sqrt(s)));
+    for(int i = current.size() - 2; i >= 0; --i){
+        resize_floor(i,s);
+        occurrences[i].resize(current[i+1].size());
+        s = ceil(s/2.0);
     }
-    current[depth - 1].push_back(node_info::get_default(depth - 1, depth, 1,input_size));
+    completed_levels.insert(depth - 2);
+
+    if(current[0].size() > 1){
+        std::stringstream ss;
+        ss <<"depth = "<<depth << " size = "<<size
+            <<" input_size = "<<input_size<<"\n";
+        throw std::invalid_argument(ss.str());
+    }
+    for(int i = 0; i < current.size() - 1; ++i){
+        restart_level(i);
+        reset_gate_value(i);
+    }
+    restart_level(current.size() - 1);
+    
 }
 
 function_generator::function_generator(std::size_t depth, std::size_t input_size) : 
@@ -59,6 +78,42 @@ void function_generator::set_init(std::size_t level){
         ++pos;
     }
 }
+void function_generator::resize_floor(std::size_t depth, std::size_t elems){
+    current[depth].resize(elems);
+    for(int j = 0; j < current[depth].size(); ++j){
+        //bottom_size sin calcular. 
+        //Aproximamos por 2*elems (factible pero incorrecto).
+        //Debe ser usada esta función con restart_level.
+        current[depth][j] = node_info::get_default(depth,current.size(),elems,2*elems);
+    }
+}
+
+void function_generator::complete_last_floors(std::size_t depth){
+    int pos = ceil(log2(size));
+    while(depth < current.size() - (pos + 1) || !completed_levels.empty()){
+        if(depth == current.size() - 1){
+            restart_level(depth);
+            return;
+        }
+        resize_node_level(depth);
+        restart_level(depth);
+        reset_gate_value(depth);
+        ++depth;
+    }
+    //CUIDAO
+    //depth + pos == cable
+    std::size_t s = size;
+    for(int i = 0; i < pos && current.size() - 2 - i >= depth ; ++i){
+        std::size_t floor = current.size() - 2 - i;
+        resize_floor(floor, s);
+        restart_level(floor);
+        reset_gate_value(floor);
+        s = ceil(s/2.0);
+        //current[depth].resize(1 << pos);
+    }
+    resize_floor(current.size() - 1, ceil(sqrt(size)));
+    restart_level(current.size() - 1);
+}
 
 void function_generator::resize_node_level(std::size_t level){
     assert(level < current.size() - 1);
@@ -71,6 +126,7 @@ void function_generator::resize_node_level(std::size_t level){
     int init = ceil(sqrt(current[level].size()));
     
     current[level + 1].resize(init);
+    completed_levels.erase(level+1);
     occurrences[level].resize(init);
     for(auto &i : occurrences[level]) i = 0;
 }
@@ -90,22 +146,12 @@ void function_generator::restart_gate_value_level(std::size_t level){
         current[i][j].set_logic_level(i+1);
     }
     set_init(level);
-    if(current[i][0].is_bypass())
-        current[i][0].set_as_and_gate();
-    else current[i][0].set_as_or_gate();
-    for(std::size_t j = 1; j < current[i].size(); ++j){
-        current[i][j].set_as_or_gate();
-        //se pone a or para que el == funcione.
-        if(current[i][j] == current[i][j-1])
-            current[i][j].set_as_and_gate();
-        else if(current[i][j].is_bypass())
-            current[i][j].set_as_and_gate();
-    }
 }
 
 void function_generator::restart_cable_level(std::size_t level){
     for(std::size_t j = 0; j < current[level].size(); ++j){
         current[level][j].set_cable_id(j);
+        //current[level][j].se
     }
 }
 
@@ -348,7 +394,7 @@ void function_generator::add_node(std::size_t level){
         (level+1, depth,current[level+1].size()+1,current[level].size());
     current[level+1].push_back(n);
     occurrences[level].resize(current[level+1].size());
-    for(auto i: occurrences[level]) i = 0;
+    for(auto &i: occurrences[level]) i = 0;
 }
 
 
@@ -373,19 +419,17 @@ std::vector<std::vector<node_info>> * function_generator::generate_next(){
         }
         else if(!max_nodes_achieved(depth)){
             add_node(depth);
-            reset_gate_value(depth);
+            if(current[depth].size() == size){
+                completed_levels.insert(depth);
+            }
             restart_level(depth);
+            reset_gate_value(depth);
             ++depth;
             break;
         }
     }
     if(depth == -1) return nullptr;
-    while(depth < current.size() - 1){
-        resize_node_level(depth);
-        restart_level(depth);
-        ++depth;
-    }
-    restart_level(depth);
+    complete_last_floors(depth);
     return &current;
 
 }
