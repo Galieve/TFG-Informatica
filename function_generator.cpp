@@ -399,6 +399,9 @@ void function_generator::add_node(std::size_t level){
     node_info n = node_info::get_default
         (level+1, depth,current[level+1].size()+1,current[level].size());
     current[level+1].push_back(n);
+    if(current[level + 1].size() == size){
+        completed_levels.insert(depth + 1);
+    }
     occurrences[level].resize(current[level+1].size());
     for(auto &i: occurrences[level]) i = 0;
 }
@@ -425,9 +428,6 @@ std::vector<std::vector<node_info>> * function_generator::generate_next(){
         }
         else if(!max_nodes_achieved(depth)){
             add_node(depth);
-            if(current[depth].size() == size){
-                completed_levels.insert(depth);
-            }
             restart_level(depth);
             reset_gate_value(depth);
             ++depth;

@@ -37,10 +37,10 @@ void use_all(const std::unique_ptr<function_generator> &fg){
             out <<"Function number: "<<cont<<"\n";
             out << *v << "The id of this function is: "
                 <<f.get_id()<<"\n-----\n";
-            /* std::cout <<"Function number: "<<cont<<"\n";
+           /* std::cout <<"Function number: "<<cont<<"\n";
             std::cout << *v << "The id of this function is: "
                 <<f.get_id()<<"\n-----\n";
-            if(cont == 269){
+            if(cont == 10859){
                 std::cout << "Todo mal\n";
             }*/
         }
@@ -59,7 +59,7 @@ int main(){
     std::cout <<"START\n";
     std::ofstream err("files/error.err");
     /*auto upfg = 
-        std::unique_ptr<function_generator>(new function_generator(3, 2,FULL_INPUT_SIZE));
+        std::unique_ptr<function_generator>(new function_generator(4, 2,FULL_INPUT_SIZE));
     v_th.push_back(std::thread(use_all, std::move(upfg)));*/
     try{
         do{
