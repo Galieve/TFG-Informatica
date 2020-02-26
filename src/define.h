@@ -4,6 +4,8 @@
 
 typedef unsigned long long ullong;
 typedef std::vector<std::vector<node_info>> vvnode_info;
+typedef std::pair<std::shared_ptr<vvnode_info>, std::pair<int, int>> data_task;
+typedef std::function<void()> task;
 
 #define DEBUG_MODE
 //#define SIMPLE_LOG

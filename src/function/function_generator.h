@@ -9,7 +9,7 @@
     #include "node_info.h"
 #endif
 #ifndef DEFINE_H
-    #include "define.h"
+    #include "../define.h"
 #endif
 
 class function_generator{
@@ -36,9 +36,9 @@ public:
 
     function_generator(std::size_t depth, std::size_t input_size);
     
-    std::unique_ptr<vvnode_info> generate_next();
+    std::shared_ptr<vvnode_info> generate_next();
 
-    std::unique_ptr<vvnode_info> get_current();
+    std::shared_ptr<vvnode_info> get_current();
 
     //friend std::ostream & operator<< (std::ostream &out, const function_generator &fg);
 

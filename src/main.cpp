@@ -13,8 +13,11 @@
 #include "function/function.cpp"
 #include "function/node.cpp"
 #include "function/meta_function_generator.cpp"
+#include "dispatch/task_dispatcher.cpp"
 #include "dispatch/function_dispatcher.cpp"
 #include "dispatch/stored_info.cpp"
+#include "statistics/statistics.cpp"
+#include "function/circuit.cpp"
 //https://github.com/adah1972/nvwa
 #include "nvwa/debug_new.cpp"
 #ifndef DEFINE_H
@@ -27,23 +30,24 @@
 
 int main(){
     meta_function_generator mfg(6, 6, FULL_INPUT_SIZE);
-    std::vector<std::thread> v_th;
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";
+    statistics stat;
 #ifdef DEBUG_MODE
-    auto upfg = 
-        std::unique_ptr<function_generator>
-            (new function_generator(4, 3, FULL_INPUT_SIZE));
-    auto fd = function_dispatcher(upfg);
-    v_th.emplace_back(std::thread(&function_dispatcher::dispatch_all,
-        std::ref(fd)));
-   
+    do{
+        auto upfg = mfg.get();
+        auto fd = function_dispatcher(std::move(upfg), &stat);
+        fd.dispatch_all();
+        mfg.advance();
+    }while(mfg.can_get_next());
 #else
+
     try{
         do{
-            /*auto upfg = mfg.get();
-            v_th.emplace_back(std::thread(use_all,std::move(upfg)));
-            mfg.advance();*/
+            auto upfg = mfg.get();
+            auto fd = function_dispatcher(std::move(upfg));
+            fd.dispatch_all();
+            mfg.advance();
         }while(mfg.can_get_next());
     }
     catch(std::exception &e){
@@ -53,10 +57,7 @@ int main(){
         return 0;
     }
 #endif
-    for(auto &i: v_th){
-        if(i.joinable())
-            i.join();
-    }
+    stat.output_results();
     std::cout<<"END\n";
     return 0;
 }

@@ -395,14 +395,12 @@ void function_generator::add_node(std::size_t level){
 
 
 
-std::unique_ptr<vvnode_info>
-    function_generator::generate_next(){
+std::shared_ptr<vvnode_info> function_generator::generate_next(){
     if(!cable_level_full_linked(current[current.size() -1].size())){
         increase_cabled_value(current[current.size() -1].size());
-        return std::make_unique<vvnode_info>(current);
+        return std::make_shared<vvnode_info>(current);
     }
     int depth = current.size() - 2;
-    //FIXME
     for(; depth >= 0 ; --depth){
         if(!and_gate_value_full(depth)){
             increase_and_gate_value(depth);
@@ -424,12 +422,12 @@ std::unique_ptr<vvnode_info>
     }
     if(depth == -1) return nullptr;
     complete_last_floors(depth);
-    return std::make_unique<vvnode_info>(current);
+    return std::make_shared<vvnode_info>(current);
 
 }
 
-std::unique_ptr<vvnode_info> function_generator::get_current() {
-    return std::make_unique<vvnode_info>(current);
+std::shared_ptr<vvnode_info> function_generator::get_current() {
+    return std::make_shared<vvnode_info>(current);
 }
 
 std::ostream & operator<< (std::ostream &out, 

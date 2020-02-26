@@ -13,7 +13,7 @@
     #include "../function/function.h"
 #endif
 #ifndef DEFINE_H
-    #include "../function/define.h"
+    #include "../define.h"
 #endif
 
 class stored_info{
@@ -58,9 +58,6 @@ public:
 
     void fill_position(std::size_t pos, 
         const std::pair<std::unique_ptr<function>,std::unique_ptr<
-        vvnode_info>> &p);
-
-    void update_statistics(const std::pair<std::unique_ptr<function>,std::unique_ptr<
         vvnode_info>> &p);
 
     bool end(std::condition_variable &cv);

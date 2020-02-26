@@ -96,11 +96,3 @@ void stored_info::send_signal(){
             i.join();
     }
 }
-
-void stored_info::update_statistics(
-    const std::pair<std::unique_ptr<function>,
-        std::unique_ptr<vvnode_info>> &p){
-
-    
-
-}

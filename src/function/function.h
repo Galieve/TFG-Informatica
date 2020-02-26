@@ -11,7 +11,7 @@
     #include "node_info.h"
 #endif
 #ifndef DEFINE_H
-    #include "define.h"
+    #include "../define.h"
 #endif
 #include <iostream>
 #include <vector>
