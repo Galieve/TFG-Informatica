@@ -11,6 +11,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <atomic>
 
 class statistics{
 
@@ -31,6 +32,8 @@ protected:
     std::map<std::string, circuit> less_size;
 
     std::mutex size_mtx;
+
+    std::atomic<int> circuits_visited = 0;
 
 public:
 

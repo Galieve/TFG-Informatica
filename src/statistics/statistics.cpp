@@ -2,6 +2,7 @@
 #include <fstream>
 
 void statistics::update_statistics(const circuit &circ){
+    ++circuits_visited;
     update_times(circ);
     auto itlg = less_gates.find(circ.get_id());
     if(itlg == less_gates.end() || itlg->second.get_logic_gates() > circ.get_logic_gates()){
@@ -70,6 +71,7 @@ void statistics::output_results(){
     for(auto p: times){
         out << p.first << " "<< p.second<< "\n";
     }
+    out << "\nTotal: "<< circuits_visited <<"\n";
     out.close();
     out.open("../files/gates.out");
     for(auto p: less_gates){
