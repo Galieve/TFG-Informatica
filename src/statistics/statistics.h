@@ -33,9 +33,11 @@ protected:
 
     std::mutex size_mtx;
 
-    std::atomic<int> circuits_visited = 0;
+    std::atomic<int> circuits_visited;
 
 public:
+
+    statistics();
 
     void update_statistics(const circuit & circ);
 

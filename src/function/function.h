@@ -39,7 +39,7 @@ protected:
 
 public:
 
-    ~function();
+    ~function() = default;
 
     static void create(const ullong &n, std::vector<bool_enum> &v);
 

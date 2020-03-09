@@ -37,10 +37,10 @@ protected:
 
 public:
     function_dispatcher(const std::unique_ptr<function_generator> &upfg, 
-        statistics * stat) : fg(std::make_unique<function_generator>(*upfg)),
+        statistics &stat) : fg(std::make_unique<function_generator>(*upfg)),
             si(generate_name_store_info(upfg)), 
             t_disp(task_dispatcher::get_instance()),
-            stat(stat) {};
+            stat(&stat) {};
 
     // function_dispatcher(const std::unique_ptr<function_generator> &upfg)
     //      : fg(std::make_unique<function_generator>(*upfg)),

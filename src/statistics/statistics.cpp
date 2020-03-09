@@ -1,6 +1,8 @@
 #include "statistics.h"
 #include <fstream>
 
+statistics::statistics() : circuits_visited(0) {};
+
 void statistics::update_statistics(const circuit &circ){
     ++circuits_visited;
     update_times(circ);

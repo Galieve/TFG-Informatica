@@ -1,7 +1,7 @@
 #include "task_dispatcher.h"
 
 task_dispatcher::task_dispatcher()
-    : tpool(std::thread::hardware_concurrency()){
+    : tpool(std::thread::hardware_concurrency()), proc(0){
 }
 
 void task_dispatcher::stop(){

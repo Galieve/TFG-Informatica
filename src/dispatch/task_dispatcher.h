@@ -17,7 +17,7 @@ protected:
 
     ctpl::thread_pool tpool;
 
-    std::atomic_int proc = 0;
+    std::atomic<int> proc;
 
 public:
 

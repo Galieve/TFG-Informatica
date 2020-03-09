@@ -36,7 +36,7 @@ int main(){
 #ifdef DEBUG_MODE
     do{
         auto upfg = mfg.get();
-        auto fd = function_dispatcher(std::move(upfg), &stat);
+        auto fd = function_dispatcher(std::move(upfg), stat);
         fd.dispatch_all();
         mfg.advance();
     }while(mfg.can_get_next());

@@ -62,6 +62,3 @@ size_t function::get_depth() const{
 size_t function::get_input_size() const{
     return input_size;
 }
-
-function::~function(){
-}
