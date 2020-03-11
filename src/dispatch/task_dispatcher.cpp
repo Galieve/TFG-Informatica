@@ -23,5 +23,5 @@ void task_dispatcher::clear(){
 
 
 bool task_dispatcher::is_busy(){
-    return proc >= std::thread::hardware_concurrency();
+    return proc >= std::thread::hardware_concurrency() * std::thread::hardware_concurrency();
 }

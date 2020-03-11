@@ -17,7 +17,7 @@ class statistics{
 
 protected:
 
-    std::map<std::string, std::size_t> times;
+    std::map<std::string, unsigned long long int> times;
 
     std::mutex times_mtx;
 
@@ -33,7 +33,11 @@ protected:
 
     std::mutex size_mtx;
 
-    std::atomic<int> circuits_visited;
+    std::atomic<unsigned long long int> circuits_visited;
+
+    std::mutex part_res_mtx;
+
+    unsigned long long int partial_results_saved;
 
 public:
 
@@ -41,7 +45,9 @@ public:
 
     void update_statistics(const circuit & circ);
 
-    void output_results();
+    void output_results(const std::string & number_file = "");
+
+    void save_partial_results();
 
 protected:
 

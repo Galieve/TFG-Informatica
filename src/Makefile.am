@@ -7,10 +7,10 @@ SUBDIRS = function dispatch statistics
 bin_PROGRAMS = main
 
 # .
-main_SOURCES = main.cpp define.h nvwa/debug_new.h #$(AR) $(ARFLAGS)
+main_SOURCES = main.cpp define.h nvwa/debug_new.h nvwa/debug_new.cpp
 
-main_LDADD = $(top_srcdir)/src/dispatch/libdispatch.a \
-$(top_srcdir)/src/function/libfunction.a \
-$(top_srcdir)/src/statistics/libstatistics.a
+main_LDADD = dispatch/libdispatch.a \
+function/libfunction.a \
+statistics/libstatistics.a
 
 

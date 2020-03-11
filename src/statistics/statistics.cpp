@@ -1,7 +1,10 @@
 #include "statistics.h"
 #include <fstream>
+#include <climits>
+#include <string>
+#include <algorithm>
 
-statistics::statistics() : circuits_visited(0) {};
+statistics::statistics() : circuits_visited(0), partial_results_saved(0) {};
 
 void statistics::update_statistics(const circuit &circ){
     ++circuits_visited;
@@ -27,7 +30,7 @@ void statistics::update_times(const circuit &circ){
         times[circ.get_id()] = 1;
     }
     else{
-        times[circ.get_id()] += 1;
+        times[circ.get_id()] = std::min(1 + times[circ.get_id()], ULLONG_MAX - 1);
     }
     times_mtx.unlock();
 }
@@ -68,26 +71,34 @@ void statistics::update_size(const circuit &circ){
     size_mtx.unlock();
 }
 
-void statistics::output_results(){
-    std::ofstream out("../files/times.out");
+void statistics::output_results(const std::string & number_file){
+    std::ofstream out("../files/times"+number_file+".out");
     for(auto p: times){
         out << p.first << " "<< p.second<< "\n";
     }
     out << "\nTotal: "<< circuits_visited <<"\n";
     out.close();
-    out.open("../files/gates.out");
+    out.open("../files/gates"+number_file+".out");
     for(auto p: less_gates){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
-    out.open("../files/size.out");
+    out.open("../files/size"+number_file+".out");
     for(auto p: less_size){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
-    out.open("../files/depth.out");
+    out.open("../files/depth"+number_file+".out");
     for(auto p: less_depth){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
+}
+
+void statistics::save_partial_results(){
+    part_res_mtx.lock();
+    partial_results_saved++;
+    std::string file_name = std::to_string(partial_results_saved);
+    output_results(file_name);
+    part_res_mtx.unlock();
 }

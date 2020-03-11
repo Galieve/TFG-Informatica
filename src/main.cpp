@@ -21,7 +21,7 @@
 //https://github.com/adah1972/nvwa
 #include "nvwa/debug_new.h"
 #ifndef DEFINE_H
-    #include "function/define.h"
+    #include "define.h"
 #endif
 #include <thread>
 #include <fstream>
@@ -29,7 +29,8 @@
 #include <atomic>
 
 int main(){
-    meta_function_generator mfg(6, 6, FULL_INPUT_SIZE);
+    int max_diago = 1e6;
+    meta_function_generator mfg(max_diago, max_diago, FULL_INPUT_SIZE);
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";
     statistics stat;

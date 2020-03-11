@@ -21,18 +21,9 @@ void stored_info::fill_position(std::size_t pos,
 void stored_info::output_next(){
     cont_mtx.lock();
     assert(cont < num_elements);
-    
-#ifdef FULL_LOG
-    out <<"Function number: "<<cont<<"\n"
-        << *function_list[cont].second
-        << "The id of this function is: "
+    out << "The id of this function is: "
         << function_list[cont].first->get_id()<<"\n-----\n";
-#elif defined(SIMPLE_LOG)
-    ss << "The id of this function is: "
-        << function_list[cont].first->get_id()<<"\n-----\n";
-#else
 
-#endif
     function_list.erase(cont);
     ++cont;
     if(cont < num_elements && function_list[cont].first != nullptr){
@@ -42,12 +33,7 @@ void stored_info::output_next(){
     else{
         signal_mtx.lock();
         if(end_signal && cont == num_elements){
-#ifdef SIMPLE_LOG
-            ss << "END\n";
-            out << ss.str();
-#elif defined(FULL_LOG)
             out << "END\n";
-#endif
             out.close();
             cont_mtx.unlock();
             signal_mtx.unlock();
@@ -66,13 +52,7 @@ bool stored_info::end(std::condition_variable & cv){
     end_signal = true;
     this->cv = &cv;
     if(!signal_sended && cont == num_elements){
-#ifdef SIMPLE_LOG
-        ss << "END\n";
-        out << ss.str();
-#elif defined(FULL_LOG)
         out << "END\n";
-#else
-#endif
         out.close();
         signal_mtx.unlock();
         send_signal();

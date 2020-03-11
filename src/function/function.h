@@ -1,6 +1,9 @@
 #pragma once
 #ifndef FUNCTION_H
 #define FUNCTION_H
+
+class function;
+
 #ifndef NODE_H
     #include "node.h"
 #endif
@@ -60,7 +63,7 @@ public:
 
     function(std::unique_ptr<std::vector<bool_enum>>v, 
         std::shared_ptr<node> n, size_t input_size,
-        std::size_t size = SIZE, std::size_t dep = DEPTH) : 
+        std::size_t size, std::size_t dep) : 
         input(std::move(v)), output_node(n), 
         input_size(input_size), size(size), depth(dep) {};
 

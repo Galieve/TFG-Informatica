@@ -430,22 +430,6 @@ std::shared_ptr<vvnode_info> function_generator::get_current() {
     return std::make_shared<vvnode_info>(current);
 }
 
-std::ostream & operator<< (std::ostream &out, 
-    const vvnode_info &v){
-    try{
-        for(int i = 0; i < v.size(); ++i){
-            for(int j = 0; j < v[i].size() - 1; ++j){
-                out << v[i][j] << " | ";
-            }
-            out << v[i][v[i].size() - 1] << "\n";
-        }
-    }catch(std::exception & e){
-        std::cerr << "La excepción de los cojones dice: " << e.what() << "\n";
-        throw e;
-    }
-    return out;
-}
-
 std::size_t function_generator::get_depth() const{
     return this->depth;
 }

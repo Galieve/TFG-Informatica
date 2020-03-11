@@ -40,11 +40,6 @@ public:
 
     std::shared_ptr<vvnode_info> get_current();
 
-    //friend std::ostream & operator<< (std::ostream &out, const function_generator &fg);
-
-    friend std::ostream & operator<< (std::ostream &out, 
-        const vvnode_info &v);
-
     std::size_t get_depth() const;
 
     std::size_t get_size() const;

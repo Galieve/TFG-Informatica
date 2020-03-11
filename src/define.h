@@ -2,8 +2,17 @@
 #ifndef DEFINE_H
 #define DEFINE_H
 
+#include <vector>
+#include <functional>
+#include <utility>
+#include <memory>
+#ifndef NODE_INFO_H
+	#include "function/node_info.h"
+ #endif
+
 typedef unsigned long long ullong;
 typedef std::vector<std::vector<node_info>> vvnode_info;
+
 typedef std::pair<std::shared_ptr<vvnode_info>, std::pair<int, int>> data_task;
 typedef std::function<void()> task;
 

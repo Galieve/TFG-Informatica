@@ -1,6 +1,9 @@
 #pragma once
 #ifndef NODE_H
-#define NODE_H
+#define NODE
+
+class node;
+
 #ifndef FUNCTION_H
     #include "function.h"
 #endif
