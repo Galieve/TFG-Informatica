@@ -1,3 +1,4 @@
+# Done by Enrique Román Calvo
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
@@ -7,7 +8,6 @@ AC_CONFIG_SRCDIR([src/main.cpp])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AM_PROG_AR
 AC_PROG_RANLIB
-# AC_CONFIG_HEADERS([config.h])
 
 
 # Checks for programs.
