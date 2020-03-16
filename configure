@@ -4175,7 +4175,6 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
-# AC_CONFIG_HEADERS([config.h])
 
 
 # Checks for programs.

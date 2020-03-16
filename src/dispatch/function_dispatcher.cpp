@@ -3,6 +3,7 @@
     #include "../function/function.h"
 #endif
 
+
 void function_dispatcher::evaluate(std::size_t i, const std::shared_ptr<vvnode_info> &v, 
         std::size_t input_size){
 
@@ -22,10 +23,9 @@ void function_dispatcher::dispatch_all(){
     int mod = 0;
     long long contaux = 0;
     std::vector<data_task> tasks;
+    int count = 0;
     do{
-
         tasks.push_back(std::make_pair(std::shared_ptr(v), std::make_pair(cont, fg->get_input_size())));
-        
 #ifdef DEBUG_MODE
         ++mod;
         if(mod == 10000){
@@ -49,6 +49,7 @@ void function_dispatcher::dispatch_all(){
         }   
         ++cont;
         v = fg->generate_next();
+
     } while (v != nullptr);
     std::function<void()> f = [fd = std::move(this), t = std::move(tasks)](){
         for(auto i: t){

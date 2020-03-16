@@ -37,7 +37,7 @@ protected:
     bool_enum * data;
 
     logic_gate_t logic_gate;
-
+    
 public:
 
     node(bool_enum * d) : logic_gate(DATA), data(d), left(nullptr), right(nullptr) {};

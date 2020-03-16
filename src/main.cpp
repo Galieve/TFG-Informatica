@@ -34,31 +34,23 @@ int main(){
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";
     statistics stat;
-#ifdef DEBUG_MODE
     do{
+        
         auto upfg = mfg.get();
         auto fd = function_dispatcher(std::move(upfg), stat);
         fd.dispatch_all();
         mfg.advance();
     }while(mfg.can_get_next());
-#else
 
-    try{
-        do{
-            auto upfg = mfg.get();
-            auto fd = function_dispatcher(std::move(upfg));
-            fd.dispatch_all();
-            mfg.advance();
-        }while(mfg.can_get_next());
-    }
-    catch(std::exception &e){
-        std::ofstream err("files/error.err");
-        std::cerr <<"Try_catch (2): " << e.what() << "\n";
-        err << e.what() << "\n";
-        return 0;
-    }
-#endif
     stat.output_results();
     std::cout<<"END\n";
     return 0;
 }
+
+/*
+OR ( 0,  1)
+AND( 0,  2) | AND( 1,  2)
+AND( 0,  5) | AND( 1,  4) | AND( 2,  3)
+CABLE ( 4 ) | CABLE ( 5 ) | CABLE ( 6 ) | CABLE ( 7 ) | CABLE ( 8 ) | CABLE ( 9 )
+
+*/

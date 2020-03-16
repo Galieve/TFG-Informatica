@@ -52,31 +52,31 @@ protected:
 
     void increase_depth();
 
-    void set_init(std::size_t level); //
+    void set_init(std::size_t level); 
 
-    void restart_level(std::size_t level); //
+    void restart_level(std::size_t level); 
 
-    void restart_cable_level(std::size_t level); //
+    void restart_cable_level(std::size_t level); 
 
     void restart_gate_value_level(std::size_t level);
 
     bool and_gate_value_full(std::size_t level); //
     
-    bool increase_gate_link_value(std::size_t level); //
+    bool increase_gate_link_value(std::size_t level); 
 
-    bool cable_level_full_linked(std::size_t level); //
+    bool cable_level_full_linked(std::size_t level); 
 
-    void increase_and_gate_value(std::size_t level); //
+    void increase_and_gate_value(std::size_t level); 
 
-    void increase_cabled_value(std::size_t level); //
+    void increase_cabled_value(std::size_t level); 
 
-    void reset_gate_value(std::size_t level); //
+    void reset_gate_value(std::size_t level); 
 
-    bool max_nodes_achieved(std::size_t level); //
+    bool max_nodes_achieved(std::size_t level); 
 
-    void add_node(std::size_t level); //
+    void add_node(std::size_t level); 
 
-    void resize_node_level(std::size_t level); //
+    void resize_node_level(std::size_t level); 
 
     void complete_last_floors(std::size_t level);
 
