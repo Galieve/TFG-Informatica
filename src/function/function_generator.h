@@ -40,6 +40,8 @@ public:
 
     std::shared_ptr<vvnode_info> get_current();
 
+    void set_current(const vvnode_info & curr);
+
     std::size_t get_depth() const;
 
     std::size_t get_size() const;

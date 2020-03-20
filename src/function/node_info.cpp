@@ -6,8 +6,15 @@
 
 std::size_t node_info::get_logic_id() const{
     assert(logic_gate);
-    return data_type.info_gate.right.second+data_type.info_gate.left.second
-        * bottom_size-data_type.info_gate.left.second*(data_type.info_gate.left.second+1)/2 + 1;
+    std::size_t res = 0;
+    auto l = data_type.info_gate.left.second;
+    auto r = data_type.info_gate.right.second;
+    res += bottom_size*bottom_size;
+    res = res - (bottom_size - l)*(bottom_size - l);
+    res += 2 * (r - l);
+    if(is_or_gate())
+        res -= 1;
+    return res;
 }
 
 std::size_t node_info::get_cable_id() const{
@@ -128,18 +135,36 @@ void node_info::set_right_cable_gate(std::size_t n){
 std::string node_info::to_string() const{
     std::stringstream out;
     if(!is_gate()) 
+#ifdef PRETTY_PRINTING
         out<<"CABLE ("<<std::setfill(' ') << std::setw(2)<<data_type.pos
             <<std::setfill(' ') << std::setw(2)<<")";
-    else if(is_or_gate()) 
+#elif defined(USEFUL_PRINTING)
+        out << "c "<<data_type.pos;
+#endif
+    else if(is_or_gate())
+#ifdef PRETTY_PRINTING
         out<<"OR ("<<std::setfill(' ') << std::setw(2)
             <<data_type.info_gate.left.second<<", "
             <<std::setfill(' ') << std::setw(2)
             <<data_type.info_gate.right.second<<")";
+#elif defined(USEFUL_PRINTING)
+        out << "o " <<data_type.info_gate.left.second 
+            << " "<<data_type.info_gate.right.second;
+#endif
     else
+#ifdef PRETTY_PRINTING
         out<<"AND("<<std::setfill(' ') << std::setw(2)
             <<data_type.info_gate.left.second<<", "
             <<std::setfill(' ') << std::setw(2)
             <<data_type.info_gate.right.second<<")";
+#elif defined(USEFUL_PRINTING)
+        if(is_bypass())
+            out << "b " <<data_type.info_gate.left.second 
+                << " "<<data_type.info_gate.right.second;
+        else
+            out << "a " <<data_type.info_gate.left.second 
+                << " "<<data_type.info_gate.right.second;
+#endif
     return out.str();
 }
 
@@ -172,4 +197,79 @@ size_t node_info::get_level() const{
 bool node_info::is_bypass() const{
     if(!is_gate()) return false;
     return this->get_cables()->left == this->get_cables()->right;
+}
+
+std::ostream & operator<<(std::ostream &out, const vvnode_info &v){
+    try{
+        for(int i = 0; i < v.size(); ++i){
+#ifdef PRETTY_PRINTING
+            for(int j = 0; j < v[i].size() - 1; ++j){
+                out << v[i][j] << " | ";
+            }
+            out << v[i][v[i].size() - 1] << "\n";
+#elif defined(USEFUL_PRINTING)
+            for(int j = 0; j < v[i].size() - 1; ++j){
+                out << v[i][j] << " ";
+            }
+            out << v[i][v[i].size() - 1] << "\n";
+#endif
+        }
+    }catch(std::exception & e){
+        std::cerr << "La excepción de los cojones dice: " << e.what() << "\n";
+        throw e;
+    }
+    return out;
+}
+
+vvnode_info node_info::generate_vvnode_info(const std::vector<std::string> &v){
+    vvnode_info vi(v.size());
+    
+    for(int i = 0; i < v.size(); ++i){
+        std::stringstream ss(v[i]);
+        int size = 0; char x;
+        while(ss >> x) ++size;
+        if(i == v.size() - 1) vi[i].resize(size / 2);
+        else vi[i].resize(size / 3);
+    }
+    int i = 0;
+    for(auto s: v){
+        std::stringstream ss(s);
+        char c;
+        int a, b;
+        int j = 0;
+        while(ss >> c){
+            if(c == 'c'){
+                ss >> a;
+                vi[i][j] = node_info::get_default(i,v.size(), -1, v[i].size());
+                vi[i][j].set_cable_id(a);
+            }
+            else{
+                ss >> a >> b;
+                vi[i][j] = node_info::get_default(i,v.size(), v[i + 1].size(), v[i].size());
+                vi[i][j].set_left_cable_gate(a);
+                vi[i][j].set_right_cable_gate(b);
+                if (c == 'o'){
+                    vi[i][j].set_as_or_gate();
+
+                }
+                else{
+                    vi[i][j].set_as_and_gate();
+
+                }
+            }
+            ++j;
+        }
+        ++i;
+    }
+    for(int i = 0; i < vi.size() - 1; ++i){
+        for(int j = 0; j < vi[i].size(); ++j){
+            vi[i][j].set_top_size(vi[i].size());
+            vi[i][j].set_bottom_size(vi[i + 1].size());
+        }
+    }
+    i = vi.size() - 1;
+    for(int j = 0; j < vi[i].size(); ++j){
+        vi[i][j].set_top_size(vi[i].size());
+    }
+    return vi;
 }

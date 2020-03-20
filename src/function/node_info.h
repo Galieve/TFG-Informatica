@@ -2,11 +2,12 @@
 #ifndef NODE_INFO_H
 #define NODE_INFO_H
 
-class node_info;
 #include <utility>
 #include <iostream>
 #include <string>
 #include <vector>
+class node_info;
+typedef std::vector<std::vector<node_info>> vvnode_info;
 
 #ifndef DEFINE_H
     #include "../define.h"
@@ -98,21 +99,9 @@ public:
 
     bool is_bypass() const;
 
-    friend std::ostream & operator<< (std::ostream &out, const std::vector<std::vector<node_info>> &v){
-    try{
-        for(int i = 0; i < v.size(); ++i){
-            for(int j = 0; j < v[i].size() - 1; ++j){
-                out << v[i][j] << " | ";
-            }
-            out << v[i][v[i].size() - 1] << "\n";
-        }
-    }catch(std::exception & e){
-        std::cerr << "La excepción de los cojones dice: " << e.what() << "\n";
-        throw e;
-    }
-    return out;
-}
+    friend std::ostream & operator<< (std::ostream &out, const vvnode_info &v);
 
+    static vvnode_info generate_vvnode_info(const std::vector<std::string> &v);
 
 protected:
 
@@ -120,5 +109,6 @@ protected:
 };
 
 typedef node_info::gate_info gate_info;
+
 
 #endif

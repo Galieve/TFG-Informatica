@@ -39,6 +39,10 @@ protected:
 
     unsigned long long int partial_results_saved;
 
+    // std::ofstream uno;
+
+    // std::ofstream dos;
+
 public:
 
     statistics();

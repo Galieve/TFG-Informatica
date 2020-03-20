@@ -29,16 +29,24 @@
 #include <atomic>
 
 int main(){
-    int max_diago = 1e6;
+    int max_diago = 8;
     meta_function_generator mfg(max_diago, max_diago, FULL_INPUT_SIZE);
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";
     statistics stat;
+    int count = 1;
     do{
         
         auto upfg = mfg.get();
         auto fd = function_dispatcher(std::move(upfg), stat);
+#ifdef DEBUG_MODE
+        if(count == 10)
+            fd.dispatch_all();
+        ++count;
+#else
         fd.dispatch_all();
+#endif
+
         mfg.advance();
     }while(mfg.can_get_next());
 

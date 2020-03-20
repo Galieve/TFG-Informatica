@@ -4,7 +4,48 @@
 #include <string>
 #include <algorithm>
 
-statistics::statistics() : circuits_visited(0), partial_results_saved(0) {};
+statistics::statistics() : circuits_visited(0), partial_results_saved(0)
+                            // ,uno("uno.txt"), 
+                            // dos("dos.txt") 
+                            {};
+
+
+void conditional_print(const vvnode_info &v, std::ofstream &uno){
+    // int l = v[v.size() -1].size();
+    // for(int i = 0; i < l; ++i){
+    //     if(v.back()[v.back().size() - l + i].get_cable_id() != FULL_INPUT_SIZE - (l - i)){
+    //         return;
+    //     }
+    // }
+    // ++contador;
+    // std::cout << contador << "\n\n";
+    // std::cout << v << "\n"; 
+    
+
+    for(int i = 0; i < v.size(); ++i){
+        for(int j = 0; j < v[i].size(); ++j){
+            auto n = v[i][j];
+            if(!n.is_gate()){
+                uno <<"c "<< n.get_cable_id()<<" ";
+            }
+            else if(n.is_bypass()){
+                auto cab = n.get_cables();
+                uno << "b "<< cab->left.second << " "<< cab->right.second<<" ";
+            }
+            else if(n.is_and_gate()){
+                auto cab = n.get_cables();
+                uno << "a "<< cab->left.second << " "<< cab->right.second<<" ";
+            }
+            else{
+                auto cab = n.get_cables();
+                uno << "o "<< cab->left.second << " "<< cab->right.second<<" ";
+            }
+        }
+        uno << "\n";
+    }
+    uno << "\n";
+    
+}
 
 void statistics::update_statistics(const circuit &circ){
     ++circuits_visited;
@@ -21,6 +62,7 @@ void statistics::update_statistics(const circuit &circ){
     if(itls == less_size.end() || itls->second.get_size() > circ.get_size()){
         update_size(circ);
     }
+
 }
 
 void statistics::update_times(const circuit &circ){
@@ -32,6 +74,13 @@ void statistics::update_times(const circuit &circ){
     else{
         times[circ.get_id()] = std::min(1 + times[circ.get_id()], ULLONG_MAX - 1);
     }
+    
+    // if(circ.get_id() == "10101010101010101111111111111111"){
+    //     conditional_print(*circ.get_logic_circuit(), uno);
+    // }
+    // else if(circ.get_id() == "01010101010101010000000000000000"){
+    //     conditional_print(*circ.get_logic_circuit(), dos);
+    // }
     times_mtx.unlock();
 }
 

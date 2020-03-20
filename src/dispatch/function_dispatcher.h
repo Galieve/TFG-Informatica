@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <atomic>
+#include <fstream>
 #include "../CTPL/ctpl_stl.h"
 #ifndef FUNCTION_GENERATOR_H
     #include "../function/function_generator.h"
@@ -28,19 +29,27 @@ protected:
     task_dispatcher t_disp;
 
     statistics * stat;
-    
+
+
 
 public:
     function_dispatcher(const std::unique_ptr<function_generator> &upfg, 
         statistics &stat) : fg(std::make_unique<function_generator>(*upfg)),
             t_disp(task_dispatcher::get_instance()),
-            stat(&stat) {};
+            stat(&stat)
+            {};
     void dispatch_all();
 
 protected:
 
     void evaluate(std::size_t i, const std::shared_ptr<vvnode_info> &v, 
         std::size_t input_size);
+
+#ifdef DEBUG_MODE
+
+    void debug_function();
+
+#endif
 
 };
 

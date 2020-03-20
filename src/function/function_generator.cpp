@@ -29,7 +29,8 @@ function_generator::function_generator(std::size_t depth, std::size_t size, std:
         restart_level(i);
         reset_gate_value(i);
     }
-    restart_level(current.size() - 1);    
+    restart_level(current.size() - 1);
+    completed_levels.erase(depth - 1);    
 }
 
 function_generator::function_generator(std::size_t depth, std::size_t input_size) : 
@@ -51,6 +52,8 @@ void function_generator::set_init(std::size_t level){
     std::size_t top_size = current[level].size(), bottom_size = current[level+1].size();
     int f = 0, s = 0, max_v = -1, pos = 0;
     bool delay_increase = true;
+    occurrences[level].resize(current[level + 1].size());
+    for(auto &i: occurrences[level]) i = 0;
     for(int i = 0; i < 2*top_size; ++i){
         current[level][pos/2].set_left_cable_gate(f);
         occurrences[level][f]++;
@@ -79,6 +82,7 @@ void function_generator::set_init(std::size_t level){
     }
 }
 void function_generator::resize_floor(std::size_t depth, std::size_t elems){
+    //assert(depth > 0);
     current[depth].resize(elems);
     if(elems == size){
         completed_levels.insert(depth);
@@ -86,40 +90,82 @@ void function_generator::resize_floor(std::size_t depth, std::size_t elems){
     else{
         completed_levels.erase(depth);
     }
+    //occurrences[depth - 1].resize(elems);
     for(int j = 0; j < current[depth].size(); ++j){
         //bottom_size sin calcular. 
         //Aproximamos por 2*elems (factible pero incorrecto).
         //Debe ser usada esta función con restart_level.
         current[depth][j] = node_info::get_default(depth,current.size(),elems,2*elems);
     }
+    
 }
 
 void function_generator::complete_last_floors(std::size_t level){
-    int reserved_levels = ceil(log2(size));
-    while(level < current.size() - (reserved_levels + 1) || !completed_levels.empty()){
-        if(level == current.size() - 1){
-            restart_level(level);
-            return;
+    std::size_t reserved_levels = ceil(log2(size));
+    resize_floor(level, occurrences[level - 1].size());
+
+    if(level == current.size() - 1){
+        restart_level(current.size() - 1);
+        return ;
+    }
+
+    auto next_level = level + 1;
+    while (next_level < current.size() - (reserved_levels + 1) || !completed_levels.empty()){
+        if(next_level == current.size() - 1){
+            resize_floor(next_level, ceil(sqrt(current[next_level - 1].size())));
+            break;
         }
-        resize_node_level(level);
-        restart_level(level);
-        reset_gate_value(level);
-        ++level;
+        resize_node_level(next_level);
+        ++next_level;
     }
-    //completed_levels == empty()
-    //CUIDAO
-    //depth + reserved_levels == cable
-    std::size_t s = size;
-    resize_floor(current.size() - 1, ceil(sqrt(size)));
+    if(completed_levels.empty()){
+        //if level < depth - 3 => !completed_levels.empty()
+        std::vector<std::size_t> max_vec(std::min(reserved_levels, depth - level - 2));
+        std::size_t max_value = size;
+        for(int i = 0; i < max_vec.size(); ++i){
+            max_vec[i] = max_value;
+            max_value /= 2;
+        }
+        max_value = std::ceil(sqrt(current[level].size()));
+        for(int i = max_vec.size() - 1; i >= 0; --i){
+            max_vec[i] = std::max(max_vec[i], max_value);
+            max_value = std::ceil(std::sqrt(max_vec[i]));
+        }
+        for(int i = 0; i < max_vec.size(); ++i){
+            resize_floor(depth - 2 - i, max_vec[i]);
+        }
+        resize_floor(current.size() - 1, ceil(sqrt(current[current.size() - 2].size())));
+    }
+    for(int i = level; i < current.size() - 1; ++i){
+        restart_level(i);
+        reset_gate_value(i);
+    }
     restart_level(current.size() - 1);
-    for(int i = 0; i < reserved_levels && current.size() - 2 - i >= level ; ++i){
-        std::size_t floor = current.size() - 2 - i;
-        resize_floor(floor, s);
-        restart_level(floor);
-        reset_gate_value(floor);
-        s = ceil(s/2.0);
-        //current[depth].resize(1 << reserved_levels);
-    }
+    // int reserved_levels = ceil(log2(size));
+    // while(level < current.size() - (reserved_levels + 1) || !completed_levels.empty()){
+    //     if(level == current.size() - 1){
+    //         restart_level(level);
+    //         return;
+    //     }
+    //     resize_node_level(level);
+    //     restart_level(level);
+    //     reset_gate_value(level);
+    //     ++level;
+    // }
+    // //completed_levels == empty()
+    // //CUIDAO
+    // //depth + reserved_levels == cable
+    // std::size_t s = size;
+    // resize_floor(current.size() - 1, ceil(sqrt(size)));
+    // restart_level(current.size() - 1);
+    // for(int i = 0; i < reserved_levels && current.size() - 2 - i >= level ; ++i){
+    //     std::size_t floor = current.size() - 2 - i;
+    //     resize_floor(floor, s);
+    //     restart_level(floor);
+    //     reset_gate_value(floor);
+    //     s = ceil(s/2.0);
+    //     //current[depth].resize(1 << reserved_levels);
+    // }
     
 }
 
@@ -132,7 +178,6 @@ void function_generator::resize_node_level(std::size_t level){
     así, dado k, el menor l que cumple que hay suficientes es ceil(sqrt(k)).
     */
     int init = ceil(sqrt(current[level].size()));
-    
     current[level + 1].resize(init);
     if(init == size)
         completed_levels.insert(level + 1);
@@ -160,6 +205,7 @@ void function_generator::restart_gate_value_level(std::size_t level){
 }
 
 void function_generator::restart_cable_level(std::size_t level){
+    assert(level == current.size() - 1);
     for(std::size_t j = 0; j < current[level].size(); ++j){
         current[level][j].set_cable_id(j);
         //current[level][j].se
@@ -245,24 +291,44 @@ void function_generator::increase_cabled_value(std::size_t top_size){
         s.insert(VAL); \
     }
 
-inline bool can_increase(std::size_t value, std::size_t bottom_size) {
-    return value + 1 < bottom_size;
+#define UPDATE_RIGHT(VAL) \
+    *right_ = VAL; \
+    s.erase(*right_); \
+    occurrences[level][*right_]++; \
+    left = *left_; \
+    right = *right_; \
+    delay_increase = true; \
+    break;
+
+#define UPDATE_LEFT(VAL) \
+    *left_ = VAL; \
+    ++occurrences[level][*left_]; \
+    s.erase(*left_); \
+    left = *left_; \
+    right = left; \
+    left_increased = true; \
+    break;
+
+inline bool is_valid_value(std::size_t value, std::size_t bottom_size) {
+    return value < bottom_size;
 }
 
-inline bool enough_holes(std::size_t value, const std::set<int> &set_, std::size_t holes){
+inline bool enough_gaps(std::size_t value, const std::set<int> &set_, std::size_t gaps){
     auto s = set_;
     s.erase(value);
-    return s.size() <= holes;
+    return s.size() <= gaps;
 }
 
-inline bool too_many_holes(std::size_t left, std::size_t right, std::size_t bottom_size, 
-    std::size_t holes, bool rep = false){
+inline bool too_many_gaps(std::size_t left, std::size_t right, std::size_t bottom_size, 
+    std::size_t gaps){
     node_info n;
     n.set_left_cable_gate(left),n.set_right_cable_gate(right);
+    if(left == right)
+        n.set_as_and_gate();
+    else
+        n.set_as_or_gate();
     n.set_bottom_size(bottom_size);
-    if(rep)
-        return bottom_size*(bottom_size+1) - (2*n.get_logic_id()) < holes;
-    else return bottom_size*(bottom_size+1) - (2*n.get_logic_id()-1) < holes;
+    return 2*(bottom_size * bottom_size - 1 - n.get_logic_id()) < gaps;
 }
 
 inline bool left_test(std::size_t value, const std::set<int> &s){
@@ -274,15 +340,25 @@ inline bool left_test(std::size_t value, const std::set<int> &s){
     else return false;
 }
 
-inline bool check_good_prefix_property(std::size_t left, std::size_t right, const std::set<int> &s,
-    std::size_t bottom_size, std::size_t holes, bool left_mode = false){
+inline bool check_good_prefix_property(std::size_t left, std::size_t right, std::size_t value,
+    const std::set<int> &s, std::size_t bottom_size, std::size_t gaps, bool left_mode = false){
     if(left_mode){
-        return can_increase(left, bottom_size) && enough_holes(left + 1,s,holes) 
-        && !too_many_holes(left + 1, left + 1,bottom_size, holes) && left_test(left + 1,s);
+        auto t = s;
+        t.erase(value);
+        if(gaps > t.size()){
+            return is_valid_value(value, bottom_size) && enough_gaps(value,s,gaps) 
+                && !too_many_gaps(value, value ,bottom_size, gaps - 1) && left_test(value,s);
+        }
+        else if(t.upper_bound(left) != t.end()) {
+            return is_valid_value(value, bottom_size) && enough_gaps(value,s,gaps) 
+                && !too_many_gaps(value, *t.upper_bound(left) ,bottom_size, gaps - 1) 
+                && left_test(value,s);
+        }
+        else return false;
     }
     else{
-        return can_increase(right, bottom_size) && enough_holes(right + 1,s,holes) 
-        && !too_many_holes(left, right + 1,bottom_size, holes);
+        return is_valid_value(value, bottom_size) && enough_gaps(value,s,gaps) 
+            && !too_many_gaps(left, value, bottom_size, gaps);
     } 
     
 }
@@ -293,63 +369,70 @@ bool function_generator::increase_gate_link_value(std::size_t level){
     int pos = 0, left = -1, right = -1;
     bool left_increased = false;
     bool delay_increase = false;
+    std::size_t gaps = 0;
+    std::size_t value;
     for(int j = top_size - 1; j >= 0; --j){
         pos = j + 1;
         auto n = &current[level][j];
         auto cables = n->get_cables();
         std::size_t * left_ = &cables->left.second;
         std::size_t * right_ = &cables->right.second;
-        REDUCE_OCCURRENCE(level, *right_);
-        if(check_good_prefix_property(*left_, *right_,s,bottom_size,2*(top_size -  pos))){
-            ++*right_;
-            s.erase(*right_);  
-            occurrences[level][*right_]++;
-            left = *left_;
-            right = *right_;
-            break;
+        REDUCE_OCCURRENCE(level, *right_)
+        value = *right_ + 1;
+        if(check_good_prefix_property(*left_, *right_,value, s,bottom_size,gaps)){
+            UPDATE_RIGHT(value)
         }
         else{
-            *right_ = -1;
+            if(s.upper_bound(*right_) != s.end()) value = *s.upper_bound(*right_);
+            else value = -1;
+            if(value != -1 && 
+                check_good_prefix_property(*left_, *right_,value, s,bottom_size,gaps)){
+                    UPDATE_RIGHT(value)
+                }
+            else *right_ = -1;
         }
-
         if(j == 0) {
             pos = 0; break;
         }
+        ++gaps;
+        value = *left_ + 1;
         REDUCE_OCCURRENCE(level, *left_);
-        if(check_good_prefix_property(*left_, *right_,s,bottom_size,2*(top_size -  pos) + 1, true)){
-            ++*left_;
-            ++occurrences[level][*left_];
-            s.erase(*left_);
-            left = *left_;
-            right = left;
-            left_increased = true;
-            delay_increase = true;
-            break;
+        if(check_good_prefix_property(*left_, *right_,value, s,bottom_size,gaps, true)){
+            UPDATE_LEFT(value)
         }
-        else *left_ = -1;
+        else{
+            if(s.upper_bound(*left_) != s.end()) value = *s.upper_bound(*left_);
+            else value = -1;
+            if(value != -1 && 
+                check_good_prefix_property(*left_, *right_,value, s,bottom_size,gaps, true)){
+                    UPDATE_LEFT(value)
+                }
+            else *left_ = -1;
+        }
+        ++gaps;
     }
 
     if(pos == 0) return false;
 
     //Complete gaps
     int real_pos = 2*pos;
-    int empty_gaps = 2*current[level].size() - real_pos;
+    int empty_gaps = gaps;
 
     if(left_increased){
-        if(empty_gaps + 1 > s.size()){
+        if(empty_gaps > s.size()){
             current[level][real_pos/2 - 1].set_right_cable_gate(left);
             occurrences[level][left]++;
             s.erase(left); //Doesn't do anything.
+            right = left;
             delay_increase = increase_right(left, right, bottom_size);
         }
         else{
-            current[level][real_pos/2 - 1].set_right_cable_gate(*s.begin());
+            current[level][real_pos/2 - 1].set_right_cable_gate(*s.upper_bound(left));
             occurrences[level][*s.begin()]++;
             s.erase(*s.begin());
 
         }
-
-
+        --empty_gaps;
     }
 
     
@@ -379,12 +462,18 @@ bool function_generator::increase_gate_link_value(std::size_t level){
             // En este caso (left, *s.begin()) es la menor pareja posible a completar.
             if (left > past_node->left.second){
                 /* CUIDADO en este caso*/
+                right = left;
+                if(s.find(right) == s.end()){
+                    assert(s.upper_bound(right) != s.end());
+                    right = *s.upper_bound(right);
+                }
+
                 current[level][real_pos/2].set_left_cable_gate(left);
-                current[level][real_pos/2].set_right_cable_gate(*s.begin());
+                current[level][real_pos/2].set_right_cable_gate(right);
                 occurrences[level][left]++;
-                occurrences[level][*s.begin()]++;
+                occurrences[level][right]++;
                 s.erase(left);
-                s.erase(s.begin());
+                s.erase(right);
 
             }
             else if(past_node->right.second < *(--s.end())){
@@ -422,33 +511,6 @@ bool function_generator::increase_gate_link_value(std::size_t level){
             }     
             
         }
-        // int val = -1;
-        // if(2*current[level].size() - real_pos > s.size()){
-        //     if(real_pos %2 == 0){
-        //         val = left;
-        //         current[level][real_pos/2].set_left_cable_gate(left);
-        //         s.erase(left);
-        //     }
-        //     else{
-        //         val = right;
-        //         current[level][real_pos/2].set_right_cable_gate(right);
-        //         s.erase(right);
-        //         if(delay_increase){
-        //             delay_increase = increase_right(left, right, bottom_size);
-        //         }
-        //         else delay_increase = true;
-        //     }
-        // }
-        // else{
-        //     val = *s.begin();
-        //     if(real_pos % 2 == 0) 
-        //         current[level][real_pos/2].set_left_cable_gate(*s.begin());
-        //     else 
-        //         current[level][real_pos/2].set_right_cable_gate(*s.begin());
-        //     s.erase(s.begin());
-        // }
-        // occurrences[level][val]++;
-        // ++real_pos;
     }
     return true;
 }
@@ -494,6 +556,7 @@ void function_generator::add_node(std::size_t level){
 
 
 std::shared_ptr<vvnode_info> function_generator::generate_next(){
+
     if(!cable_level_full_linked(current[current.size() -1].size())){
         increase_cabled_value(current[current.size() -1].size());
         return std::make_shared<vvnode_info>(current);
@@ -524,6 +587,24 @@ std::shared_ptr<vvnode_info> function_generator::generate_next(){
     complete_last_floors(depth);
     return std::make_shared<vvnode_info>(current);
 
+}
+
+void function_generator::set_current(const vvnode_info &curr){
+    completed_levels.clear();
+    occurrences.resize(depth - 1);
+    for(int i = 0; i < curr.size() - 1; ++i){
+        if(curr[i].size() == size)
+            completed_levels.insert(i);
+        occurrences[i].resize(curr[i + 1].size());
+        for(auto &it : occurrences[i]) it = 0;
+        for(int j = 0; j < curr[i].size(); ++j){
+            occurrences[i][curr[i][j].get_cables()->left.second]++;
+            occurrences[i][curr[i][j].get_cables()->right.second]++;
+        }
+
+    }
+    assert(!completed_levels.empty());
+    current = curr;
 }
 
 std::shared_ptr<vvnode_info> function_generator::get_current() {
