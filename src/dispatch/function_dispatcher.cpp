@@ -2,6 +2,7 @@
 #ifndef FUNCTION_H
     #include "../function/function.h"
 #endif
+#include "../infint/InfInt.h"
 
 //11111111111111111111111101000000
 //00000000000000000000000010111111
@@ -75,7 +76,7 @@ void function_dispatcher::dispatch_all(){
         if(mod == PATH_FRAGMENT_SIZE){
             contaux++;
             mod = 0;
-            std::cout << "vamos a por el: "<< contaux << PATH_FRAGMENT_SIZE  << "\n";
+            std::cout << "vamos a por el: "<< InfInt(contaux*PATH_FRAGMENT_SIZE)  << "\n";
         }
 #endif
         if(tasks.size() == 10000){

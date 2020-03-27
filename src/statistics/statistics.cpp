@@ -15,7 +15,6 @@ int statistics::get_saved(){
 }
 
 void conditional_print(const vvnode_info &v, std::ofstream &uno){
-    
 
     for(int i = 0; i < v.size(); ++i){
         for(int j = 0; j < v[i].size(); ++j){

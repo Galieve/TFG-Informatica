@@ -34,7 +34,7 @@ int main(int argc, char * argv[]){
         return -1;
     }
 
-    int max_diago = 4;
+    int max_diago = 8;
     if(argc == 3)
         max_diago = std::atoi(argv[2]);
     meta_function_generator mfg(max_diago, max_diago, FULL_INPUT_SIZE);

@@ -13,7 +13,7 @@ std::string function::get_id() const{
 bool function::evaluate(ullong n) const{
     assert(output_node != nullptr);
     create(n, *input);
-    return output_node->evaluate(depth, size, input_size);
+    return output_node->evaluate();
 }
 
 function function::build(const vvnode_info & parse_info, 
