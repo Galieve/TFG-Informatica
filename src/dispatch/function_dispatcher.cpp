@@ -20,6 +20,12 @@ void function_dispatcher::evaluate(std::size_t i, const std::shared_ptr<vvnode_i
 #ifdef DEBUG_MODE
 
 void conditional_print(const vvnode_info &v, std::ostream &out){
+    int i = v.size() - 1;
+    int l = v[i].size();
+    for(int j = 0; j < v[i].size(); ++j){
+        if(v[i][j].get_cable_id() != FULL_INPUT_SIZE - l + j )
+            return;
+    }
     out << v << "\n";
 }
 /*
@@ -57,19 +63,21 @@ void function_dispatcher::dispatch_all(){
     long long contaux = 0;
     std::vector<data_task> tasks;
     
-    //std::ofstream debug("aux.err");
+    std::ofstream debug("debug.txt");
     do{
     
         tasks.push_back(std::make_pair(std::shared_ptr(v), std::make_pair(cont, fg->get_input_size())));
 #ifdef DEBUG_MODE
         conditional_print(*v, debug);
 #endif
+#ifdef WHERE_AM_I_MODE
         ++mod;
-        if(mod == 10000){
+        if(mod == PATH_FRAGMENT_SIZE){
             contaux++;
             mod = 0;
-            std::cout << "vamos a por el: "<< contaux << "0000"  << std::endl;
+            std::cout << "vamos a por el: "<< contaux << PATH_FRAGMENT_SIZE  << "\n";
         }
+#endif
         if(tasks.size() == 10000){
             bool set_all = false;
             while(t_disp.is_busy());

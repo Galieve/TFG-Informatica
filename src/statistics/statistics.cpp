@@ -4,22 +4,17 @@
 #include <string>
 #include <algorithm>
 
-statistics::statistics() : circuits_visited(0), partial_results_saved(0)
-                            // ,uno("uno.txt"), 
-                            // dos("dos.txt") 
-                            {};
+statistics::statistics() : circuits_visited(0), 
+    partial_results_saved(0) {};
 
+statistics::statistics(int number_file) : circuits_visited(0), 
+    partial_results_saved(number_file) {};
+
+int statistics::get_saved(){
+    return partial_results_saved;
+}
 
 void conditional_print(const vvnode_info &v, std::ofstream &uno){
-    // int l = v[v.size() -1].size();
-    // for(int i = 0; i < l; ++i){
-    //     if(v.back()[v.back().size() - l + i].get_cable_id() != FULL_INPUT_SIZE - (l - i)){
-    //         return;
-    //     }
-    // }
-    // ++contador;
-    // std::cout << contador << "\n\n";
-    // std::cout << v << "\n"; 
     
 
     for(int i = 0; i < v.size(); ++i){
@@ -48,7 +43,6 @@ void conditional_print(const vvnode_info &v, std::ofstream &uno){
 }
 
 void statistics::update_statistics(const circuit &circ){
-    ++circuits_visited;
     update_times(circ);
     auto itlg = less_gates.find(circ.get_id());
     if(itlg == less_gates.end() || itlg->second.get_logic_gates() > circ.get_logic_gates()){
@@ -67,20 +61,14 @@ void statistics::update_statistics(const circuit &circ){
 
 void statistics::update_times(const circuit &circ){
     times_mtx.lock();
+    circuits_visited += 1;
     auto it = times.find(circ.get_id());
     if(it == times.end()){
         times[circ.get_id()] = 1;
     }
     else{
-        times[circ.get_id()] = std::min(1 + times[circ.get_id()], ULLONG_MAX - 1);
+        times[circ.get_id()] += 1;
     }
-    
-    // if(circ.get_id() == "10101010101010101111111111111111"){
-    //     conditional_print(*circ.get_logic_circuit(), uno);
-    // }
-    // else if(circ.get_id() == "01010101010101010000000000000000"){
-    //     conditional_print(*circ.get_logic_circuit(), dos);
-    // }
     times_mtx.unlock();
 }
 

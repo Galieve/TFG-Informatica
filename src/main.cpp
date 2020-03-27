@@ -28,25 +28,34 @@
 #include <functional>
 #include <atomic>
 
-int main(){
-    int max_diago = 8;
+int main(int argc, char * argv[]){
+    if(argc > 3){
+        std::cerr<< "Bad usage\n";
+        return -1;
+    }
+
+    int max_diago = 4;
+    if(argc == 3)
+        max_diago = std::atoi(argv[2]);
     meta_function_generator mfg(max_diago, max_diago, FULL_INPUT_SIZE);
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";
-    statistics stat;
-    int count = 1;
+
+    int file_saved = 0;
+    if(argc >= 2){
+       file_saved = std::atoi(argv[1]);
+    }
+    statistics stat(file_saved);
+    
+    int count = 0;
     do{
         
         auto upfg = mfg.get();
         auto fd = function_dispatcher(std::move(upfg), stat);
-#ifdef DEBUG_MODE
-        if(count == 10)
+        if(stat.get_saved() == count)
             fd.dispatch_all();
+        //else: we skip this value.
         ++count;
-#else
-        fd.dispatch_all();
-#endif
-
         mfg.advance();
     }while(mfg.can_get_next());
 

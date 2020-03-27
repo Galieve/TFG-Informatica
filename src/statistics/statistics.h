@@ -7,6 +7,7 @@
 #ifndef CIRCUIT_H
     #include "../function/circuit.h"
 #endif
+#include "../infint/InfInt.h"
 #include <mutex>
 #include <map>
 #include <string>
@@ -17,7 +18,7 @@ class statistics{
 
 protected:
 
-    std::map<std::string, unsigned long long int> times;
+    std::map<std::string, InfInt> times;
 
     std::mutex times_mtx;
 
@@ -33,11 +34,11 @@ protected:
 
     std::mutex size_mtx;
 
-    std::atomic<unsigned long long int> circuits_visited;
+    InfInt circuits_visited;
 
     std::mutex part_res_mtx;
 
-    unsigned long long int partial_results_saved;
+    int partial_results_saved;
 
     // std::ofstream uno;
 
@@ -47,11 +48,15 @@ public:
 
     statistics();
 
+    statistics(int number_file);
+
     void update_statistics(const circuit & circ);
 
     void output_results(const std::string & number_file = "");
 
     void save_partial_results();
+
+    int get_saved();
 
 protected:
 
