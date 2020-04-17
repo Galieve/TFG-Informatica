@@ -64,7 +64,6 @@ void function_dispatcher::dispatch_all(){
     long long contaux = 0;
     std::vector<data_task> tasks;
     
-    std::ofstream debug("debug.txt");
     do{
         if(v != nullptr)
             tasks.push_back(std::make_pair(std::shared_ptr(v), std::make_pair(cont, fg->get_input_size())));
@@ -79,7 +78,7 @@ void function_dispatcher::dispatch_all(){
             std::cout << "vamos a por el: "<< InfInt(contaux*PATH_FRAGMENT_SIZE)  << "\n";
         }
 #endif
-        if(tasks.size() == 10000){
+        if(tasks.size() == TASK_SIZE){
             bool set_all = false;
             while(t_disp.is_busy());
             std::function<void()> f = [fd = std::move(this), t = std::move(tasks), &set_all](){
@@ -92,12 +91,14 @@ void function_dispatcher::dispatch_all(){
             while(!set_all);           
             tasks.clear();
         }
+        v = fg->generate_next();
         ++log_cont;
-        if(log_cont == PATH_FRAGMENT_SIZE * PATH_FRAGMENT_SIZE){
+        //task_size | task_size * scale_factor => tasks is empty
+        if(log_cont == TASK_SIZE * SCALE_FACTOR){
+            while(!t_disp.is_empty());
             stat->save_log(*fg);
             log_cont = 0;
         }
-        v = fg->generate_next();
 
 
 #ifdef DEBUG_MODE  

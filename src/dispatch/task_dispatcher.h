@@ -33,6 +33,8 @@ public:
 
     bool is_busy();
 
+    bool is_empty();
+
     task_dispatcher();
 
     ~task_dispatcher() = default;

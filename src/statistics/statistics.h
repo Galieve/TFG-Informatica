@@ -45,14 +45,6 @@ protected:
 
     const std::string log_file = LOG_FILENAME;
 
-    std::mutex process_mtx;
-
-    long long int process = 0;
-
-    std::atomic<int> process_flag = 0;
-
-    std::mutex log_mtx;
-
 public:
 
     statistics();

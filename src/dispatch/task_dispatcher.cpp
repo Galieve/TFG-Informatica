@@ -20,6 +20,10 @@ void task_dispatcher::clear(){
     tpool.clear_queue();
 }
 
+bool task_dispatcher::is_empty(){
+    return proc == 0;
+}
+
 
 
 bool task_dispatcher::is_busy(){

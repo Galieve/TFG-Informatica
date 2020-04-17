@@ -42,16 +42,6 @@ void conditional_print(const vvnode_info &v, std::ofstream &uno){
 }
 
 void statistics::update_statistics(const circuit &circ){
-    while(process < 0 || process_flag != 1){
-        while(process < 0); 
-        process_mtx.lock();
-        if(process >= 0 && process_flag == 0)
-            process_flag = 1;
-        process_mtx.unlock();
-    }
-    process_mtx.lock();
-    ++process;
-    process_mtx.unlock();
     update_times(circ);
     auto itlg = less_logic_gates.find(circ.get_id());
     if(itlg == less_logic_gates.end() || itlg->second.get_logic_gates() > circ.get_logic_gates()){
@@ -65,11 +55,6 @@ void statistics::update_statistics(const circuit &circ){
     if(itls == less_size.end() || itls->second.get_size() > circ.get_size()){
         update_size(circ);
     }
-    process_mtx.lock();
-    --process;
-    if(process == 0)
-        process_flag = 0;
-    process_mtx.unlock();
 }
 
 void statistics::update_times(const circuit &circ){
@@ -138,47 +123,22 @@ void statistics::output_results_protected(const std::string & number_file,
     out.close();
 }
 
-#define NO_PROCESS_RUNNING() \
-    while(process > 0 || process_flag!= -1){ \
-        while(process > 0); \
-        process_mtx.lock(); \
-        if(process <= 0 && process_flag == 0) \
-           process_flag = -1; \
-        process_mtx.unlock(); \
-    } \
-    process_mtx.lock(); \
-    --process; \
-    process_mtx.unlock();
-
-#define LET_PROCESS_RUN() \
-    process_mtx.lock(); \
-    ++process; \
-    if(process == 0) \
-        process_flag = 0; \
-    process_mtx.unlock();
-
 void statistics::save_partial_results(){
     part_res_mtx.lock();
     partial_results_saved++;
     std::string file_name = std::to_string(partial_results_saved);
-    NO_PROCESS_RUNNING()
     output_results(file_name);
-    LET_PROCESS_RUN()
     part_res_mtx.unlock();
 }
 
 void statistics::save_log(const function_generator &fg){
-    NO_PROCESS_RUNNING()
-    log_mtx.lock();
     output_results_protected("_log", "log");
-    LET_PROCESS_RUN()
     std::ofstream log_file(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
     log_file << fg.get_depth() << " "<<fg.get_size() <<" " << fg.get_input_size() << "\n";
     if(fg.get_current() == nullptr)
         log_file << "nullptr\n";
     else
         log_file << *fg.get_current() << "\n";
-    log_mtx.unlock();  
 }
 
 function_generator statistics::restore_log(){
