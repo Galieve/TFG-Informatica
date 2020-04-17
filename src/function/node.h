@@ -19,9 +19,9 @@ class node;
 #include <unordered_map>
 
 
-const uint SIZE = 4;
+const unsigned int SIZE = 4;
 
-const uint DEPTH = 1;
+const unsigned int DEPTH = 1;
 
 class node{
 
