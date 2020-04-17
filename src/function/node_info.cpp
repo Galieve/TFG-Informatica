@@ -221,7 +221,9 @@ std::ostream & operator<<(std::ostream &out, const vvnode_info &v){
     return out;
 }
 
-vvnode_info node_info::generate_vvnode_info(const std::vector<std::string> &v){
+std::shared_ptr<vvnode_info> node_info::generate_vvnode_info
+    (const std::vector<std::string> &v){
+    if(v.size() == 1 && v[0] == "nullptr") return nullptr;
     vvnode_info vi(v.size());
     
     for(int i = 0; i < v.size(); ++i){
@@ -271,5 +273,5 @@ vvnode_info node_info::generate_vvnode_info(const std::vector<std::string> &v){
     for(int j = 0; j < vi[i].size(); ++j){
         vi[i][j].set_top_size(vi[i].size());
     }
-    return vi;
+    return std::make_shared<vvnode_info>(vi);
 }

@@ -556,7 +556,7 @@ void function_generator::add_node(std::size_t level){
 
 
 std::shared_ptr<vvnode_info> function_generator::generate_next(){
-
+    if(nullptr_flag) return nullptr;
     if(!cable_level_full_linked(current[current.size() -1].size())){
         increase_cabled_value(current[current.size() -1].size());
         return std::make_shared<vvnode_info>(current);
@@ -583,32 +583,44 @@ std::shared_ptr<vvnode_info> function_generator::generate_next(){
         }
         else completed_levels.erase(depth);
     }
-    if(depth == -1) return nullptr;
+    if(depth == -1){
+        nullptr_flag = true;
+        return nullptr;
+    }
     complete_last_floors(depth);
     return std::make_shared<vvnode_info>(current);
 
 }
 
-void function_generator::set_current(const vvnode_info &curr){
+void function_generator::set_current(std::shared_ptr<vvnode_info> &curr){
+    if(curr == nullptr){
+        nullptr_flag = true;
+        return;
+    }
+    depth = curr->size();
+    size = 1;
+    for(int i = 0; i < curr->size() -1; ++i) size = std::max(size, (*curr)[i].size());
     completed_levels.clear();
     occurrences.resize(depth - 1);
-    for(int i = 0; i < curr.size() - 1; ++i){
-        if(curr[i].size() == size)
+
+    for(int i = 0; i < curr->size() - 1; ++i){
+        if((*curr)[i].size() == size)
             completed_levels.insert(i);
-        occurrences[i].resize(curr[i + 1].size());
+        occurrences[i].resize((*curr)[i + 1].size());
         for(auto &it : occurrences[i]) it = 0;
-        for(int j = 0; j < curr[i].size(); ++j){
-            occurrences[i][curr[i][j].get_cables()->left.second]++;
-            occurrences[i][curr[i][j].get_cables()->right.second]++;
+        for(int j = 0; j < (*curr)[i].size(); ++j){
+            occurrences[i][(*curr)[i][j].get_cables()->left.second]++;
+            occurrences[i][(*curr)[i][j].get_cables()->right.second]++;
         }
 
     }
-    assert(!completed_levels.empty());
-    current = curr;
+    assert(!completed_levels.empty() || depth == 1);
+    current = *curr;
 }
 
-std::shared_ptr<vvnode_info> function_generator::get_current() {
-    return std::make_shared<vvnode_info>(current);
+std::shared_ptr<vvnode_info> function_generator::get_current() const{
+    if(nullptr_flag) return nullptr;
+    else return std::make_shared<vvnode_info>(current);
 }
 
 std::size_t function_generator::get_depth() const{

@@ -101,7 +101,7 @@ public:
 
     friend std::ostream & operator<< (std::ostream &out, const vvnode_info &v);
 
-    static vvnode_info generate_vvnode_info(const std::vector<std::string> &v);
+    static std::shared_ptr<vvnode_info> generate_vvnode_info(const std::vector<std::string> &v);
 
 protected:
 

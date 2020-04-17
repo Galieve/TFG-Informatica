@@ -42,10 +42,20 @@ void conditional_print(const vvnode_info &v, std::ofstream &uno){
 }
 
 void statistics::update_statistics(const circuit &circ){
+    while(process < 0 || process_flag != 1){
+        while(process < 0); 
+        process_mtx.lock();
+        if(process >= 0 && process_flag == 0)
+            process_flag = 1;
+        process_mtx.unlock();
+    }
+    process_mtx.lock();
+    ++process;
+    process_mtx.unlock();
     update_times(circ);
-    auto itlg = less_gates.find(circ.get_id());
-    if(itlg == less_gates.end() || itlg->second.get_logic_gates() > circ.get_logic_gates()){
-        update_gates(circ);
+    auto itlg = less_logic_gates.find(circ.get_id());
+    if(itlg == less_logic_gates.end() || itlg->second.get_logic_gates() > circ.get_logic_gates()){
+        update_logic_gates(circ);
     }
     auto itld = less_depth.find(circ.get_id());
     if(itld == less_depth.end() || itld->second.get_depth() > circ.get_depth()){
@@ -55,7 +65,11 @@ void statistics::update_statistics(const circuit &circ){
     if(itls == less_size.end() || itls->second.get_size() > circ.get_size()){
         update_size(circ);
     }
-
+    process_mtx.lock();
+    --process;
+    if(process == 0)
+        process_flag = 0;
+    process_mtx.unlock();
 }
 
 void statistics::update_times(const circuit &circ){
@@ -71,70 +85,161 @@ void statistics::update_times(const circuit &circ){
     times_mtx.unlock();
 }
 
-void statistics::update_gates(const circuit &circ){
-    gates_mtx.lock();
-    auto it = less_gates.find(circ.get_id());
-    if(it == less_gates.end()){
-        less_gates[circ.get_id()] = circ;
-    }
-    else if(it->second.get_logic_gates() > circ.get_logic_gates()){
-        less_gates[circ.get_id()] = circ;
-    }
-    gates_mtx.unlock();
+#define UPDATE(FIELD) \
+    FIELD ## _mtx.lock(); \
+    auto it = less_ ## FIELD.find(circ.get_id()); \
+    if(it == less_ ## FIELD.end()){ \
+        less_ ## FIELD [circ.get_id()] = circ; \
+    } \
+    else if(it->second.get_## FIELD() > circ.get_## FIELD()){ \
+        less_ ## FIELD [circ.get_id()] = circ; \
+    } \
+    FIELD ## _mtx.unlock(); \
+
+void statistics::update_logic_gates(const circuit &circ){
+    UPDATE(logic_gates)
 }
 
 void statistics::update_depth(const circuit &circ){
-    depth_mtx.lock();
-    auto it = less_depth.find(circ.get_id());
-    if(it == less_depth.end()){
-        less_depth[circ.get_id()] = circ;
-    }
-    else if(it->second.get_depth() > circ.get_depth()){
-        less_depth[circ.get_id()] = circ;
-    }
-    depth_mtx.unlock();
+    UPDATE(depth)
 }
 
 void statistics::update_size(const circuit &circ){
-    size_mtx.lock();
-    auto it = less_size.find(circ.get_id());
-    if(it == less_size.end()){
-        less_size[circ.get_id()] = circ;
-    }
-    else if(it->second.get_size() > circ.get_size()){
-        less_size[circ.get_id()] = circ;
-    }
-    size_mtx.unlock();
+    UPDATE(size)
 }
 
-void statistics::output_results(const std::string & number_file){
-    std::ofstream out("../files/times"+number_file+".out");
+void statistics::output_results(const std::string &number_file){
+    output_results_protected(number_file);
+}
+
+void statistics::output_results_protected(const std::string & number_file,
+    const std::string & file_type){
+
+    std::ofstream out("../files/times"+number_file+"."+file_type);
     for(auto p: times){
         out << p.first << " "<< p.second<< "\n";
     }
     out << "\nTotal: "<< circuits_visited <<"\n";
     out.close();
-    out.open("../files/gates"+number_file+".out");
-    for(auto p: less_gates){
+    out.open("../files/gates"+number_file+"."+file_type);
+    for(auto p: less_logic_gates){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
-    out.open("../files/size"+number_file+".out");
+    out.open("../files/size"+number_file+"."+file_type);
     for(auto p: less_size){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
-    out.open("../files/depth"+number_file+".out");
+    out.open("../files/depth"+number_file+"."+file_type);
     for(auto p: less_depth){
         out << p.first << "\n" << *p.second.get_logic_circuit() << "\n";
     }
     out.close();
 }
 
+#define NO_PROCESS_RUNNING() \
+    while(process > 0 || process_flag!= -1){ \
+        while(process > 0); \
+        process_mtx.lock(); \
+        if(process <= 0 && process_flag == 0) \
+           process_flag = -1; \
+        process_mtx.unlock(); \
+    } \
+    process_mtx.lock(); \
+    --process; \
+    process_mtx.unlock();
+
+#define LET_PROCESS_RUN() \
+    process_mtx.lock(); \
+    ++process; \
+    if(process == 0) \
+        process_flag = 0; \
+    process_mtx.unlock();
+
 void statistics::save_partial_results(){
     part_res_mtx.lock();
     partial_results_saved++;
     std::string file_name = std::to_string(partial_results_saved);
+    NO_PROCESS_RUNNING()
     output_results(file_name);
+    LET_PROCESS_RUN()
     part_res_mtx.unlock();
+}
+
+void statistics::save_log(const function_generator &fg){
+    NO_PROCESS_RUNNING()
+    log_mtx.lock();
+    output_results_protected("_log", "log");
+    LET_PROCESS_RUN()
+    std::ofstream log_file(LOG_FILENAME, std::ofstream::out | std::ofstream::trunc);
+    log_file << fg.get_depth() << " "<<fg.get_size() <<" " << fg.get_input_size() << "\n";
+    if(fg.get_current() == nullptr)
+        log_file << "nullptr\n";
+    else
+        log_file << *fg.get_current() << "\n";
+    log_mtx.unlock();  
+}
+
+function_generator statistics::restore_log(){
+    restore_times();
+    restore_depth();
+    restore_size();
+    restore_logic_gates();
+
+    std::ifstream log_file(LOG_FILENAME);
+
+    std::size_t depth, size, input_size;
+    log_file >> depth >> size >> input_size;
+    std::vector<std::string> vs;
+    std::string s = "";
+    getline(log_file, s);
+    while(getline(log_file, s), s!= ""){
+        vs.push_back(s);
+    }
+    auto curr = node_info::generate_vvnode_info(vs);
+    log_file.close();
+
+    function_generator fg(depth, size, input_size);
+    fg.set_current(curr);
+    return fg;
+}
+
+#define RESTORE(FIELD) \
+    std::string field_name = #FIELD; \
+    std::ifstream in("../files/" + field_name + "_log.log"); \
+    std::string id, s; \
+    less_ ## FIELD.clear(); \
+    while(getline(in, id), id != ""){ \
+        std::vector<std::string> vs; \
+        while(getline(in, s), s!= ""){ \
+            vs.push_back(s); \
+        } \
+        auto spvvnode_info = node_info::generate_vvnode_info(vs); \
+        less_ ## FIELD[id] = circuit(spvvnode_info, id); \
+    } \
+    in.close();
+
+void statistics::restore_depth(){
+    RESTORE(depth)
+}
+
+void statistics::restore_size(){
+    RESTORE(size)
+}
+
+void statistics::restore_logic_gates(){
+    RESTORE(logic_gates)
+}
+
+void statistics::restore_times(){
+    std::ifstream in("../files/times_log.log");
+    std::string id, times_str;
+    while(in >> id, id != "Total:"){
+        in >> times_str;
+        times[id] = InfInt(times_str);
+    }
+    in >> times_str;
+    circuits_visited = InfInt(times_str);
+    in.close();
 }

@@ -30,6 +30,10 @@ protected:
 
     std::unordered_set<int> completed_levels;
 
+    //if you want to set up a nullptr vector (i.e. the end), this flag makes
+    //computations easier
+    bool nullptr_flag = false;
+
 public:
 
     function_generator(std::size_t depth,std::size_t size, std::size_t input_size);
@@ -38,9 +42,9 @@ public:
     
     std::shared_ptr<vvnode_info> generate_next();
 
-    std::shared_ptr<vvnode_info> get_current();
+    std::shared_ptr<vvnode_info> get_current() const;
 
-    void set_current(const vvnode_info & curr);
+    void set_current(std::shared_ptr<vvnode_info> & curr);
 
     std::size_t get_depth() const;
 

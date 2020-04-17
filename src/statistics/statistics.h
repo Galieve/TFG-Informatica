@@ -8,6 +8,9 @@
     #include "../function/circuit.h"
 #endif
 #include "../infint/InfInt.h"
+#ifndef FUNCTION_GENERATOR_H
+    #include "../function/function_generator.h"
+#endif
 #include <mutex>
 #include <map>
 #include <string>
@@ -22,9 +25,9 @@ protected:
 
     std::mutex times_mtx;
 
-    std::map<std::string, circuit> less_gates;
+    std::map<std::string, circuit> less_logic_gates;
 
-    std::mutex gates_mtx;
+    std::mutex logic_gates_mtx;
 
     std::map<std::string, circuit> less_depth;
 
@@ -40,9 +43,15 @@ protected:
 
     int partial_results_saved;
 
-    // std::ofstream uno;
+    const std::string log_file = LOG_FILENAME;
 
-    // std::ofstream dos;
+    std::mutex process_mtx;
+
+    long long int process = 0;
+
+    std::atomic<int> process_flag = 0;
+
+    std::mutex log_mtx;
 
 public:
 
@@ -58,15 +67,30 @@ public:
 
     int get_saved();
 
+    void save_log(const function_generator &fg);
+
+    function_generator restore_log();
+
 protected:
+
+    void output_results_protected(const std::string & number_file,
+        const std::string & file_type = "out");
 
     void update_times(const circuit &circ);
 
-    void update_gates(const circuit &circ);
+    void update_logic_gates(const circuit &circ);
 
     void update_depth(const circuit &circ);
 
     void update_size(const circuit &circ);
+
+    void restore_times();
+
+    void restore_logic_gates();
+
+    void restore_depth();
+
+    void restore_size();
 
 };
 

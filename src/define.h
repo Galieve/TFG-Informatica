@@ -19,13 +19,13 @@ typedef std::function<void()> task;
 //#define DEBUG_MODE
 #define WHERE_AM_I_MODE
 #ifdef WHERE_AM_I_MODE
-	#define PATH_FRAGMENT_SIZE 100000
+	#define PATH_FRAGMENT_SIZE 10000
 #endif
 //#define SIMPLE_LOG
 //#define FULL_LOG
 //#define PRETTY_PRINTING
 #define USEFUL_PRINTING
-
+#define LOG_FILENAME "../files/log_file.log"
 #define INPUT_SIZE 5
 #define FULL_INPUT_SIZE 2*INPUT_SIZE
 

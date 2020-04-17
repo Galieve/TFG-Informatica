@@ -52,7 +52,7 @@ void function_dispatcher::debug_function(){
 void function_dispatcher::dispatch_all(){
     std::cout << "START (d: " << fg->get_depth() << ", s: " << fg->get_size() << ")\n";
     std::size_t cont = 0;
-
+    long long int log_cont = 0;
 #ifdef DEBUG_MODE
     //debug_function();
     //return;
@@ -66,8 +66,8 @@ void function_dispatcher::dispatch_all(){
     
     std::ofstream debug("debug.txt");
     do{
-    
-        tasks.push_back(std::make_pair(std::shared_ptr(v), std::make_pair(cont, fg->get_input_size())));
+        if(v != nullptr)
+            tasks.push_back(std::make_pair(std::shared_ptr(v), std::make_pair(cont, fg->get_input_size())));
 #ifdef DEBUG_MODE
         conditional_print(*v, debug);
 #endif
@@ -92,7 +92,13 @@ void function_dispatcher::dispatch_all(){
             while(!set_all);           
             tasks.clear();
         }
+        ++log_cont;
+        if(log_cont == PATH_FRAGMENT_SIZE * PATH_FRAGMENT_SIZE){
+            stat->save_log(*fg);
+            log_cont = 0;
+        }
         v = fg->generate_next();
+
 
 #ifdef DEBUG_MODE  
         // ++cont;
@@ -111,5 +117,6 @@ void function_dispatcher::dispatch_all(){
     t_disp.dispatch_task(f);
     t_disp.stop();
     stat->save_partial_results();
+    stat->save_log(*fg);
     std::cout << "END (d: " << fg->get_depth() << ", s: " << fg->get_size() << ")\n";
 }
