@@ -19,7 +19,7 @@ typedef std::function<void()> task;
 //#define DEBUG_MODE
 #define WHERE_AM_I_MODE
 #define PATH_FRAGMENT_SIZE 10000
-#define SCALE_FACTOR 10
+#define SCALE_FACTOR 100000
 #define TASK_SIZE 10000
 //#define SIMPLE_LOG
 //#define FULL_LOG

@@ -8,20 +8,20 @@
 #include <cassert>
 #include <functional>
 #include <future>
-#include "function/function_generator.h"
-#include "function/node_info.h"
-#include "function/function.h"
-#include "function/node.h"
-#include "function/meta_function_generator.h"
-#include "dispatch/task_dispatcher.h"
-#include "dispatch/function_dispatcher.h"
-#include "dispatch/stored_info.h"
-#include "statistics/statistics.h"
-#include "function/circuit.h"
+#include "function/function_generator.cpp"
+#include "function/node_info.cpp"
+#include "function/function.cpp"
+#include "function/node.cpp"
+#include "function/meta_function_generator.cpp"
+#include "dispatch/task_dispatcher.cpp"
+#include "dispatch/function_dispatcher.cpp"
+#include "dispatch/stored_info.cpp"
+#include "statistics/statistics.cpp"
+#include "function/circuit.cpp"
 //https://github.com/adah1972/nvwa
-#include "nvwa/debug_new.h"
+#include "nvwa/debug_new.cpp"
 #ifndef DEFINE_H
-    #include "define.h"
+    #include "define.cpp"
 #endif
 #include <thread>
 #include <fstream>
