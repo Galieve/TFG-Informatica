@@ -54,7 +54,7 @@ public:
 
 protected:
 
-    function_generator() : depth(0) {};
+    inline function_generator() : depth(0) {};
 
     void increase_depth();
 

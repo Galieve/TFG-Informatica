@@ -33,7 +33,7 @@ protected:
 
 
 public:
-    function_dispatcher(const std::unique_ptr<function_generator> &upfg, 
+    inline function_dispatcher(const std::unique_ptr<function_generator> &upfg, 
         statistics &stat) : fg(std::make_unique<function_generator>(*upfg)),
             t_disp(task_dispatcher::get_instance()),
             stat(&stat)

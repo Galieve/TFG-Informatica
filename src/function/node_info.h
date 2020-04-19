@@ -42,7 +42,7 @@ protected:
 
 public:
 
-    node_info() : data_type() {};
+    inline node_info() : data_type() {};
 
     static node_info get_default(int level, int depth, int top_size, int bottom_size);
 

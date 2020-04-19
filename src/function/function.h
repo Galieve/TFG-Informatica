@@ -42,7 +42,7 @@ protected:
 
 public:
 
-    ~function() = default;
+    inline ~function() = default;
 
     static void create(const ullong &n, std::vector<bool_enum> &v);
 
@@ -61,13 +61,13 @@ public:
 
     std::string get_id() const;
 
-    function(std::unique_ptr<std::vector<bool_enum>>v, 
+    inline function(std::unique_ptr<std::vector<bool_enum>>v, 
         std::shared_ptr<node> n, size_t input_size,
         std::size_t size, std::size_t dep) : 
         input(std::move(v)), output_node(n), 
         input_size(input_size), size(size), depth(dep) {};
 
-    function(const function &f) :
+    inline function(const function &f) :
         input(std::make_unique<std::vector<bool_enum>>(*f.input.get())), 
         output_node(std::shared_ptr<node>(f.output_node)),
         input_size(f.input_size),

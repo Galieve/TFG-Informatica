@@ -5,7 +5,7 @@
 
 enum bool_enum {undef_, true_, false_};
 
-static bool cast(const bool_enum &b){
+inline static bool cast(const bool_enum &b){
     switch (b){
     case true_: return true;
     case false_: return false;

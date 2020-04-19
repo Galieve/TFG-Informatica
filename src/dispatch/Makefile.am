@@ -8,4 +8,3 @@ libdispatch_a_CPPFLAGS= -I$(top_srcdir)/src -I$(top_srcdir)/src/function \
 libdispatch_a_SOURCES = function_dispatcher.cpp function_dispatcher.h \
 task_dispatcher.cpp task_dispatcher.h stored_info.cpp stored_info.h
 
-# $(RANLIB)

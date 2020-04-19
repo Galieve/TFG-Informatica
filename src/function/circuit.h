@@ -21,26 +21,26 @@ public:
 
 public:
 
-    circuit(const std::shared_ptr<vvnode_info> &l_circ, const std::string &id) : 
+    inline circuit(const std::shared_ptr<vvnode_info> &l_circ, const std::string &id) : 
         logic_circuit_ptr(l_circ), id(id), size(l_circ->size()),
             depth((*l_circ)[0].size()){
                 calculate_logic_gates();
             };
 
-    circuit(const circuit &c) : logic_circuit_ptr(c.logic_circuit_ptr), id(c.id),
+    inline circuit(const circuit &c) : logic_circuit_ptr(c.logic_circuit_ptr), id(c.id),
         size(c.size), depth(c.depth), logic_gates(c.logic_gates) {};
 
-    circuit() = default;
+    inline circuit() = default;
 
-    std::size_t get_size() const { return size; }
+    inline std::size_t get_size() const { return size; }
 
-    std::size_t get_depth() const { return depth; }
+    inline std::size_t get_depth() const { return depth; }
 
-    std::size_t get_logic_gates() const { return logic_gates; }
+    inline std::size_t get_logic_gates() const { return logic_gates; }
 
-    std::string get_id() const { return id; }
+    inline std::string get_id() const { return id; }
 
-    std::shared_ptr<vvnode_info> get_logic_circuit() const { return logic_circuit_ptr; }
+    inline std::shared_ptr<vvnode_info> get_logic_circuit() const { return logic_circuit_ptr; }
 
 protected:
 

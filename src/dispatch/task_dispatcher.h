@@ -6,10 +6,15 @@
 #include <future>
 #include <memory>
 #include <atomic>
+
+class task_dispatcher;
+
 #ifndef DEFINE_H
     #include "../define.h"
 #endif
-#include "../CTPL/ctpl_stl.h"
+#ifndef __ctpl_stl_thread_pool_H__
+    #include "../CTPL/ctpl_stl.h"
+#endif
 
 class task_dispatcher{
 
@@ -21,7 +26,7 @@ protected:
 
 public:
 
-    static task_dispatcher get_instance(){
+    inline static task_dispatcher get_instance(){
         return task_dispatcher();
     }
 
@@ -44,7 +49,7 @@ public:
 
 protected:
 
-    task_dispatcher & operator =(const task_dispatcher &) = delete;
+    inline task_dispatcher & operator =(const task_dispatcher &) = delete;
 
 };
 #endif

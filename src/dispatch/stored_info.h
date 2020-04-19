@@ -53,7 +53,7 @@ protected:
 
 public:
 
-    stored_info(const std::string &name) : cont(0), function_list(0),
+    inline stored_info(const std::string &name) : cont(0), function_list(0),
         out(name), signal_sended(false), end_signal(false), num_elements(0) { };
 
     void fill_position(std::size_t pos, 

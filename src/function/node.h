@@ -49,10 +49,10 @@ protected:
     
 public:
 
-    node(bool_enum * d, InfInt id) : logic_gate(DATA), data(d), 
+    inline node(bool_enum * d, InfInt id) : logic_gate(DATA), data(d), 
         left(nullptr), right(nullptr), id(id) {};
 
-    node(std::shared_ptr<node> &l, std::shared_ptr<node> &r, logic_gate_t type, 
+    inline node(std::shared_ptr<node> &l, std::shared_ptr<node> &r, logic_gate_t type, 
         InfInt id) : logic_gate(type), left(l), right(r), id(id) {};
 
     bool evaluate();
