@@ -312,7 +312,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # what flags you want to pass to the C compiler & linker
-AM_CXXFLAGS = -std=c++17 -pthread -O2 -mtune=native -fsanitize=undefined
+AM_CXXFLAGS = -std=c++17 -pthread
 AM_LDFLAGS = 
 # this lists the binaries to produce, the (non-PHONY, binary) targets in
 # the previous manual Makefile

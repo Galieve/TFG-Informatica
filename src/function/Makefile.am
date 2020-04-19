@@ -1,3 +1,5 @@
+AM_CXXFLAGS = -std=c++17 -pthread
+
 noinst_LIBRARIES = libfunction.a
 
 libfunction_a_CPPFLAGS= -I$(top_srcdir)/src
