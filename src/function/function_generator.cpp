@@ -322,12 +322,12 @@ inline bool enough_gaps(std::size_t value, const std::set<int> &set_, std::size_
 inline bool too_many_gaps(std::size_t left, std::size_t right, std::size_t bottom_size, 
     std::size_t gaps){
     node_info n;
+    n.set_bottom_size(bottom_size);
     n.set_left_cable_gate(left),n.set_right_cable_gate(right);
     if(left == right)
         n.set_as_and_gate();
     else
         n.set_as_or_gate();
-    n.set_bottom_size(bottom_size);
     return 2*(bottom_size * bottom_size - 1 - n.get_logic_id()) < gaps;
 }
 

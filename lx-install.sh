@@ -1,4 +1,4 @@
-./configure CXXFLAGS="-mtune=native -fsanitize=undefined"
+./configure CXXFLAGS=""
 make
 sudo make install
 mkdir -p files
