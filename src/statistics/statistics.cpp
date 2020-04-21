@@ -1,4 +1,7 @@
 #include "statistics.h"
+#ifndef TASK_DISPATCHER_H   
+    #include "../dispatch/task_dispatcher.h"
+#endif
 #include <fstream>
 #include <climits>
 #include <string>
@@ -142,10 +145,23 @@ void statistics::save_log(const function_generator &fg){
 }
 
 function_generator statistics::restore_log(){
-    restore_times();
-    restore_depth();
-    restore_size();
-    restore_logic_gates();
+    auto td = task_dispatcher::get_instance();
+    std::vector<std::function<void()>> vf;
+    vf.push_back([s = std::move(this)](){
+        s->restore_times();
+    });
+    vf.push_back([s = std::move(this)](){
+        s->restore_logic_gates();
+    });
+    vf.push_back([s = std::move(this)](){
+        s->restore_size();
+    });
+    vf.push_back([s = std::move(this)](){
+        s->restore_depth();
+    });
+    for(auto &f: vf){
+        td.dispatch_task(f);
+    }
 
     std::ifstream log_file(LOG_FILENAME);
 
@@ -162,16 +178,18 @@ function_generator statistics::restore_log(){
 
     function_generator fg(depth, size, input_size);
     fg.set_current(curr);
+    while(!td.is_empty());
     return fg;
 }
 
-#define RESTORE(FIELD) \
-    std::string field_name = #FIELD; \
+#define RESTORE(FIELD, FIELD_NAME) \
+    std::string field_name = #FIELD_NAME; \
     std::ifstream in("../files/" + field_name + "_log.log"); \
     std::string id, s; \
     less_ ## FIELD.clear(); \
+    std::vector<std::string> vs; \
     while(getline(in, id), id != ""){ \
-        std::vector<std::string> vs; \
+        vs.clear(); \
         while(getline(in, s), s!= ""){ \
             vs.push_back(s); \
         } \
@@ -181,19 +199,20 @@ function_generator statistics::restore_log(){
     in.close();
 
 void statistics::restore_depth(){
-    RESTORE(depth)
+    RESTORE(depth, depth)
 }
 
 void statistics::restore_size(){
-    RESTORE(size)
+    RESTORE(size, size)
 }
 
 void statistics::restore_logic_gates(){
-    RESTORE(logic_gates)
+    RESTORE(logic_gates, gates)
 }
 
 void statistics::restore_times(){
     std::ifstream in("../files/times_log.log");
+    times.clear();
     std::string id, times_str;
     while(in >> id, id != "Total:"){
         in >> times_str;

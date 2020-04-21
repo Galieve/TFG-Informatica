@@ -55,8 +55,11 @@ int main(int argc, char * argv[]){
     }
 
     statistics stat(file_saved);
-    if(restore_log)
+    if(restore_log){
         upfg_log = std::make_unique<function_generator>(stat.restore_log());
+        std::cout << "Log restored\n";
+    }
+        
     meta_function_generator mfg(max_depth, max_depth, FULL_INPUT_SIZE);
     std::vector<function_dispatcher> vfd;
     std::cout <<"START\n";   
