@@ -11,7 +11,7 @@ class meta_function_generator{
 protected:
     std::size_t depth = 1;
 
-    std::size_t size = 1;
+    long long size = 1;
 
     std::size_t input_size;
 

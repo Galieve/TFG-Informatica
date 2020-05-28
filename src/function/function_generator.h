@@ -44,7 +44,7 @@ public:
 
     std::shared_ptr<vvnode_info> get_current() const;
 
-    void set_current(std::shared_ptr<vvnode_info> & curr);
+    void set_current(const std::shared_ptr<vvnode_info> curr);
 
     std::size_t get_depth() const;
 
@@ -87,6 +87,9 @@ protected:
     void complete_last_floors(std::size_t level);
 
     void resize_floor(std::size_t level, std::size_t elems);
+
+    // return v = [k,...,m], |v| = v_size.
+    std::vector<std::size_t> get_minimal_sizes(int k, int m, int v_size);
 
 };
 

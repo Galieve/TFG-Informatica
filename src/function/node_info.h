@@ -99,6 +99,11 @@ public:
 
     bool is_bypass() const;
 
+#ifdef PRODUCTION_MODE
+    static std::shared_ptr<vvnode_info> generate_reversed
+        (const std::shared_ptr<vvnode_info> &v);
+#endif
+
     friend std::ostream & operator<< (std::ostream &out, const vvnode_info &v);
 
     static std::shared_ptr<vvnode_info> generate_vvnode_info(const std::vector<std::string> &v);

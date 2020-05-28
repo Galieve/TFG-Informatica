@@ -6,6 +6,28 @@ bool node::evaluate(){
     return evaluate(dp_table);
 }
 
+#ifdef PRODUCTION_MODE
+std::string node::get_function_equivalent(){
+    if(logic_gate == DATA){
+        assert(right == nullptr && left == nullptr);
+        return cast(*data) ? "1" : "0";
+    }
+
+    std::string l, r ;
+    l = left->get_function_equivalent();
+    r = right->get_function_equivalent();
+        switch (logic_gate){
+    case AND:
+        return l.append(r);
+    
+    default:
+        //case or
+        return r.append(l);
+    }
+    
+}
+#endif
+
 bool node::evaluate(std::vector<int> & dp_table){
     if(logic_gate == DATA){
         assert(right == nullptr && left == nullptr);
@@ -40,7 +62,9 @@ bool node::evaluate(std::vector<int> & dp_table){
     }
 }
 
-std::shared_ptr<node> node::build(std::vector<bool_enum> &v, const vvnode_info &build_v, 
+std::shared_ptr<node> node::build(
+    const std::vector<std::shared_ptr<bool_enum>> &v,
+    const vvnode_info &build_v, 
     size_t depth, size_t size, size_t input_size){
 
     std::vector<std::vector<std::shared_ptr<node>>> 
@@ -50,16 +74,19 @@ std::shared_ptr<node> node::build(std::vector<bool_enum> &v, const vvnode_info &
     return node::build(v, build_v, {0, 0}, nodes, id);
 }
 
-std::shared_ptr<node> node::build(std::vector<bool_enum> &v, const vvnode_info &ady_circuit,
-    const std::pair<int,int> &p, std::vector<std::vector<std::shared_ptr<node>>> &nodes,
+std::shared_ptr<node> node::build(const std::vector<std::shared_ptr<bool_enum>> &v,
+    const vvnode_info &ady_circuit,
+    const std::pair<int,int> &p, 
+    std::vector<std::vector<std::shared_ptr<node>>> &nodes,
     InfInt &id
     ){
         
     auto i = p.first, j = p.second;
-    if(nodes[i][j] != nullptr) return nodes[i][j];
+    assert(i<nodes.size() && j < nodes[i].size());
+    if(nodes[i][j] != nullptr) return std::shared_ptr<node>(nodes[i][j]);
     
     if(!ady_circuit[i][j].is_gate()){
-        nodes[i][j] = std::make_shared<node>(&v[ady_circuit[i][j].get_cable_id()], id);
+        nodes[i][j] = std::make_shared<node>(v[ady_circuit[i][j].get_cable_id()], id);
         ++id;
         return nodes[i][j];
     }

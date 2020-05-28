@@ -5,19 +5,31 @@ meta_function_generator::meta_function_generator
     (std::size_t max_depth, std::size_t max_size, std::size_t input_size) :
     max_depth(max_depth), max_size(max_size), input_size(input_size){
     
+#ifndef PRODUCTION_MODE
     depth = 1;
     size = 1;
+#else
+    depth = PROD_BITS + 1;
+    size = 1;
+#endif
 }
 
 meta_function_generator::meta_function_generator
     (std::size_t max_values, std::size_t input_size) :
     max_depth(max_values), max_size(max_values), input_size(input_size){
-    
+
+#ifndef PRODUCTION_MODE
     depth = 1;
     size = 1;
+#else
+    depth = PROD_BITS + 1;
+    size = 1;
+#endif
 }
 
 void meta_function_generator::advance(){
+
+#ifndef PRODUCTION_MODE
     //que hace lo d la dcha?
     if(depth == 1 || depth - 2 <= ceil(log2(size + 1))){
         depth = size + depth;
@@ -27,6 +39,11 @@ void meta_function_generator::advance(){
         --depth;
         ++size;
     }
+#else
+    if(size <= 8){
+        ++size;
+    }
+#endif
 }
 
 std::unique_ptr<function_generator> meta_function_generator::get(){

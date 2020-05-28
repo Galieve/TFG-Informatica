@@ -45,6 +45,12 @@ protected:
 
     const std::string log_file = LOG_FILENAME;
 
+    int data_files_created = 0;
+
+    const std::string folder = FLUSH_FOLDER;
+    
+    std::mutex flush_mtx;
+
 public:
 
     statistics();
@@ -63,9 +69,12 @@ public:
 
     function_generator restore_log();
 
+    bool must_flush();
+
 protected:
 
-    void output_results_protected(const std::string & number_file,
+    void output_results_protected(const std::string &folder, 
+        const std::string & number_file,
         const std::string & file_type = "out");
 
     void update_times(const circuit &circ);
@@ -84,6 +93,7 @@ protected:
 
     void restore_size();
 
+    void flush_data();
 };
 
 #endif

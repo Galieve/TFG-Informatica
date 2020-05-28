@@ -275,3 +275,17 @@ std::shared_ptr<vvnode_info> node_info::generate_vvnode_info
     }
     return std::make_shared<vvnode_info>(vi);
 }
+
+#ifdef PRODUCTION_MODE
+std::shared_ptr<vvnode_info> node_info::generate_reversed
+    (const std::shared_ptr<vvnode_info> &v){
+    
+    auto vv = *v;
+    assert(vv.back().size() <= 2);
+    for(int i = 0; i < vv.back().size(); ++i){
+        vv.back()[i].set_cable_id(1 - vv.back()[i].get_cable_id());
+    }
+    return std::make_shared<vvnode_info>(vv);
+  
+}
+#endif

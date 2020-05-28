@@ -21,7 +21,7 @@ public:
 
 public:
 
-    inline circuit(const std::shared_ptr<vvnode_info> &l_circ, const std::string &id) : 
+    inline circuit(const std::shared_ptr<vvnode_info> l_circ, const std::string &id) : 
         logic_circuit_ptr(l_circ), id(id), size(l_circ->size()),
             depth((*l_circ)[0].size()){
                 calculate_logic_gates();

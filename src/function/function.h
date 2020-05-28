@@ -21,8 +21,9 @@ class function;
 #include <string>
 #include <bitset>
 #include <memory>
-
-
+#include <mutex>
+#include <memory>
+#include <atomic>
 
 class function{
 
@@ -38,16 +39,23 @@ protected:
 
     std::shared_ptr<node> output_node;
 
-    std::unique_ptr<std::vector<bool_enum>> input;
+    std::vector<std::shared_ptr<bool_enum>> input;
 
 public:
 
     inline ~function() = default;
 
-    static void create(const ullong &n, std::vector<bool_enum> &v);
+    static void create(const ullong &n, const std::vector<std::shared_ptr<bool_enum>> &v);
 
     static function build(const vvnode_info & parse_info,
+        std::size_t size,
         std::size_t input_size);
+
+#ifdef PRODUCTION_MODE
+
+    std::string get_function_equivalent();
+
+#endif
 
     void evaluate_all();
 
@@ -61,17 +69,17 @@ public:
 
     std::string get_id() const;
 
-    inline function(std::unique_ptr<std::vector<bool_enum>>v, 
+    inline function(const std::vector<std::shared_ptr<bool_enum>> &v, 
         std::shared_ptr<node> n, size_t input_size,
         std::size_t size, std::size_t dep) : 
         input(std::move(v)), output_node(n), 
         input_size(input_size), size(size), depth(dep) {};
 
     inline function(const function &f) :
-        input(std::make_unique<std::vector<bool_enum>>(*f.input.get())), 
+        input(f.input), 
         output_node(std::shared_ptr<node>(f.output_node)),
         input_size(f.input_size),
-        size(f.size), depth(f.depth), bits(std::move(f.bits)) {};
+        size(f.size), depth(f.depth) ,bits(std::move(f.bits)) {};        
     
 };
 #endif

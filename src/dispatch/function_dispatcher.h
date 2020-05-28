@@ -30,6 +30,7 @@ protected:
 
     statistics * stat;
 
+    std::mutex build_mtx;
 
 
 public:
@@ -42,7 +43,7 @@ public:
 
 protected:
 
-    void evaluate(std::size_t i, const std::shared_ptr<vvnode_info> &v, 
+    void evaluate(std::size_t i, const std::shared_ptr<vvnode_info> v, 
         std::size_t input_size);
 
 #ifdef DEBUG_MODE

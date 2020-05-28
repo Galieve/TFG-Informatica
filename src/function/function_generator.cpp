@@ -6,20 +6,25 @@
 #include <exception>
 
 function_generator::function_generator(std::size_t depth, std::size_t size, std::size_t input_size)
-    : depth(depth), max_depth(depth), input_size(input_size), size(size){
+    : depth(depth), max_depth(depth), input_size(input_size), size(size), nullptr_flag(false){
     occurrences.resize(depth - 1,std::vector<std::size_t>(1,0));
     current.resize(depth);
     std::size_t s = size;
-    resize_floor(current.size() - 1,ceil(sqrt(s)));
+    /*resize_floor(current.size() - 1,ceil(sqrt(s)));
     for(int i = current.size() - 2; i >= 0; --i){
         resize_floor(i,s);
         occurrences[i].resize(current[i+1].size());
         s = ceil(s/2.0);
-    }
+    }*/
+    /*
     if(depth > 1)
         completed_levels.insert(depth - 2);
-
-    if(current[0].size() > 1){
+    */
+    resize_floor(0, 1);
+    complete_last_floors(0);
+    restart_level(0);
+    reset_gate_value(0);
+    /*if(current[0].size() > 1){
         std::stringstream ss;
         ss <<"depth = "<<depth << " size = "<<size
             <<" input_size = "<<input_size<<"\n";
@@ -30,11 +35,13 @@ function_generator::function_generator(std::size_t depth, std::size_t size, std:
         reset_gate_value(i);
     }
     restart_level(current.size() - 1);
-    completed_levels.erase(depth - 1);    
+    completed_levels.erase(depth - 1); 
+    */   
 }
 
 function_generator::function_generator(std::size_t depth, std::size_t input_size) : 
     function_generator(depth, input_size,input_size){
+    nullptr_flag = false;
 }
 
 inline bool increase_right(int &left, int &right, int bottom_size){
@@ -101,15 +108,29 @@ void function_generator::resize_floor(std::size_t depth, std::size_t elems){
 }
 
 void function_generator::complete_last_floors(std::size_t level){
+    //assert(level > 0);
     std::size_t reserved_levels = ceil(log2(size));
-    resize_floor(level, occurrences[level - 1].size());
+    //resize_floor(level, occurrences[level - 1].size());
 
+    if(completed_levels.empty()){
+        auto v = get_minimal_sizes
+            (current[level].size(), input_size, current.size() - level);
+        //std::cout << "problemas\n";
+        for(int i = 1; i < v.size(); ++i){
+            resize_floor(level + i, v[i]);
+        }
+    }
+    else{
+        for(int i = level + 1; i < current.size(); ++i){
+            resize_floor(i, std::ceil(std::sqrt(current[i-1].size())));
+        }
+    }
     if(level == current.size() - 1){
         restart_level(current.size() - 1);
         return ;
     }
 
-    auto next_level = level + 1;
+   /* auto next_level = level + 1;
     while (next_level < current.size() - (reserved_levels + 1) || !completed_levels.empty()){
         if(next_level == current.size() - 1){
             resize_floor(next_level, ceil(sqrt(current[next_level - 1].size())));
@@ -117,14 +138,14 @@ void function_generator::complete_last_floors(std::size_t level){
         }
         resize_node_level(next_level);
         ++next_level;
-    }
-    if(completed_levels.empty()){
+    }*/
+    /*if(completed_levels.empty()){
         //if level < depth - 3 => !completed_levels.empty()
         std::vector<std::size_t> max_vec(std::min(reserved_levels, depth - level - 2));
         std::size_t max_value = size;
         for(int i = 0; i < max_vec.size(); ++i){
             max_vec[i] = max_value;
-            max_value /= 2;
+            max_value = std::ceil(max_value/2.0);
         }
         max_value = std::ceil(sqrt(current[level].size()));
         for(int i = max_vec.size() - 1; i >= 0; --i){
@@ -135,7 +156,7 @@ void function_generator::complete_last_floors(std::size_t level){
             resize_floor(depth - 2 - i, max_vec[i]);
         }
         resize_floor(current.size() - 1, ceil(sqrt(current[current.size() - 2].size())));
-    }
+    }*/
     for(int i = level; i < current.size() - 1; ++i){
         restart_level(i);
         reset_gate_value(i);
@@ -535,17 +556,24 @@ void function_generator::reset_gate_value(std::size_t level){
 
 
 bool function_generator::max_nodes_achieved(std::size_t level){
+    assert(input_size > 1);
+    double ml = std::log(current[level+1].size()) / std::log(input_size);
+    //ml >= 0
+    int dml = std::log2(ml) + 10e-3; //prevents fail bc precision
+    //dml <= current.size() - (level + 1 + 1);
     if(level + 1 == current.size() - 1) 
         return 2*current[level].size() == current[level+1].size() || 
-            current[level+1].size() == input_size;
+            current[level+1].size() == input_size 
+            || dml >= current.size() - (level + 1 + 1);
     else return 2*current[level].size() == current[level+1].size() || 
-            current[level+1].size() == size;
+            current[level+1].size() == size ||
+            dml >= current.size() - (level + 1 + 1);
 }
 
 void function_generator::add_node(std::size_t level){
     node_info n = node_info::get_default
         (level+1, depth,current[level+1].size()+1,current[level].size());
-    current[level+1].push_back(n);
+    current[level+1].emplace_back(n);
     if(current[level + 1].size() == size && level + 1 != depth - 1){
         completed_levels.insert(level + 1);
     }
@@ -564,6 +592,8 @@ std::shared_ptr<vvnode_info> function_generator::generate_next(){
     //completed_levels.erase(current.size() - 1);
     int depth = current.size() - 2;
     for(; depth >= 0 ; --depth){
+        
+
         if(!and_gate_value_full(depth)){
             increase_and_gate_value(depth);
             ++depth;
@@ -576,6 +606,8 @@ std::shared_ptr<vvnode_info> function_generator::generate_next(){
         }
         else if(!max_nodes_achieved(depth)){
             add_node(depth);
+            //assert(current[4].size() < 5);
+
             restart_level(depth);
             reset_gate_value(depth);
             ++depth;
@@ -587,12 +619,13 @@ std::shared_ptr<vvnode_info> function_generator::generate_next(){
         nullptr_flag = true;
         return nullptr;
     }
+    resize_floor(depth, current[depth].size());
     complete_last_floors(depth);
     return std::make_shared<vvnode_info>(current);
 
 }
 
-void function_generator::set_current(std::shared_ptr<vvnode_info> &curr){
+void function_generator::set_current(const std::shared_ptr<vvnode_info> curr){
     if(curr == nullptr){
         nullptr_flag = true;
         return;
@@ -617,6 +650,34 @@ void function_generator::set_current(std::shared_ptr<vvnode_info> &curr){
     assert(!completed_levels.empty() || depth == 1);
     current = *curr;
 }
+
+std::vector<std::size_t> function_generator::get_minimal_sizes(int k, int m, int v_size){
+    std::vector<std::size_t> v(v_size, 0);
+    v.back() = m;
+    double ms = std::log(size)/std::log(m);
+    int l = 1;
+    if(ms > 2){
+        l = std::ceil(std::log2(ms));
+    }
+    auto vs = size;
+    for(int i = l; i >= 0; --i){
+        v[v_size - i - 1] = vs;
+        vs = std::ceil(std::sqrt(vs));
+    }
+    auto vk = k;
+    for(int i = v_size - 1; i > l; --i){
+        v[v_size - i - 1] = k;
+        vk = std::ceil(std::sqrt(vk));
+    }
+    vs = std::ceil(size/2.0);
+    for(int i = l+1; i < v_size; ++i){
+        v[v_size - i - 1] = std::max(vs, v[v_size - i - 1]);
+        vs = std::ceil(vs/2.0);
+    }
+    return v;
+}
+
+
 
 std::shared_ptr<vvnode_info> function_generator::get_current() const{
     if(nullptr_flag) return nullptr;
