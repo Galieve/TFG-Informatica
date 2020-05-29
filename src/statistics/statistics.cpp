@@ -59,24 +59,23 @@ void statistics::update_statistics(const circuit &circ){
         update_size(circ);
     }
 #ifdef PRODUCTION_MODE
-    flush_mtx.lock();
-    if(times.size() >= MAX_SIZE){
-        flush_data();
-    }
-    flush_mtx.unlock();  
+    flush_data();
         
 #endif
 }
 
 #ifdef PRODUCTION_MODE
 void statistics::flush_data(){
-
-    output_results_protected(folder,std::to_string(data_files_created));
-    ++data_files_created;
-    less_depth.clear();
-    less_size.clear();
-    less_logic_gates.clear();
-    times.clear();
+    flush_mtx.lock();
+    if(times.size() >= MAX_SIZE){
+        output_results_protected(folder,std::to_string(data_files_created));
+        ++data_files_created;
+        less_depth.clear();
+        less_size.clear();
+        less_logic_gates.clear();
+        times.clear();
+    }
+    flush_mtx.unlock(); 
 }
 #endif
 
