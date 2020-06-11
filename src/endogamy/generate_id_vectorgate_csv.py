@@ -13,11 +13,12 @@ def get_gate_vector(lines):
     times_vector = []
     gates_vector = []
     lines = ast.literal_eval(lines)
-    for i in range(len(lines) - 1):
+    for i in range(len(lines)):
         times = {}
         gates_vector.append(0)
-        for c in lines[i]:
-            if c == 'o' or c == 'b' or c == 'a':
+        elements = lines[i].split()
+        for c in elements:
+            if c == 'o' or c == 'b' or c == 'a' or c == 'c':
                 gates_vector[-1] += 1
             elif c.isdigit():
                 s = int(c)
@@ -25,9 +26,10 @@ def get_gate_vector(lines):
                     times[s] += 1
                 else:
                     times[s] = 1
-            t_v = []
-        for key, val in times.items():
-            t_v.append(val)
+        t_v = []
+        t_v = list(times.values())
+        # for key, val in times.items():
+        #     t_v.append(val)
         times_vector.append(t_v)
     return gates_vector, times_vector
 
@@ -52,16 +54,37 @@ def add_gate_vector_column(df, dfvalid):
 
 
 if __name__ == "__main__":
-    file_path = get_path_file('data_in_csv.csv')
-    dfvalid = pd.read_csv(file_path, sep=';')
-    for i in range(368):
-        file_path = get_path_file('data_in_csv'+str(i)+'.csv', 'database/')
-        df = pd.read_csv(file_path, sep=';')
-        print('file '+str(i)+'readed')
 
+    pass
+    # file_path = get_path_file('data_in_csv.csv')
+    # df = pd.read_csv(file_path, sep=';')
+    # df = add_gate_vector_column(df, df)
+    # print('column generated')
+    # df1 = df.loc[:, df.columns.isin(['id', 'gates_vector', 'times_vector'])]
+    # file_path = get_path_file('id (test).csv', '')
+    # df1.to_csv(file_path, header=True, index=False, encoding='utf-8', sep=";")
 
-        df = add_gate_vector_column(df, dfvalid)
-        print('column generated')
-        df1 = df.loc[:, df.columns.isin(['id', 'gates_vector', 'times_vector'])]
-        file_path = get_path_file('id_gate_vector'+str(i)+'.csv', 'database/')
-        df1.to_csv(file_path, header=(i==0), index=False, encoding='utf-8', sep=";")
+    # file_path = get_path_file('data_in_csv.csv')
+    # dfvalid = pd.read_csv(file_path, sep=';')
+    # for i in range(10000,10153):
+    #     file_path = get_path_file('data_in_csv'+str(i)+'.csv', '')
+    #     df = pd.read_csv(file_path, sep=';')
+    #     print('file '+str(i)+' readed')
+    #
+    #
+    #     df = add_gate_vector_column(df, dfvalid)
+    #     print('column generated')
+    #     df1 = df.loc[:, df.columns.isin(['id', 'gates_vector', 'times_vector'])]
+    #     file_path = get_path_file('id_gate_vector'+str(i)+'.csv', 'database/')
+    #     df1.to_csv(file_path, header=(i==0), index=False, encoding='utf-8', sep=";")
+        #df1.to_csv(file_path, header=True, index=False, encoding='utf-8', sep=";")
+    # file_path = get_path_file('data_in_csv.csv')
+    # df = pd.read_csv(file_path, sep=';')
+    # print('file readed')
+    #
+    #
+    # df = add_gate_vector_column(df, dfvalid)
+    # print('column generated')
+    # df1 = df.loc[:, df.columns.isin(['id', 'gates_vector', 'times_vector'])]
+    # file_path = get_path_file('id.csv')
+    # df1.to_csv(file_path, header=True, index=False, encoding='utf-8', sep=";")

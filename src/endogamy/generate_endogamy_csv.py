@@ -36,31 +36,48 @@ def add_repr_endogamy(df):
 
 def get_multilevel_endogamy(gates, times):
     assert(len(gates) == len(times))
-    n = len(gates)
+    n = len(gates) - 1
     e = []
-    for i in range(len(gates)):
-        l = n - i - 1
+
+    for i in range(1,n+1):
+        # l va desde 0 a n-1 <=> 0 a len(gates) -2
+        l = n - i
         pl = gates[i]
-        tl = times[i]
+        tl = times[i-1]
         el = 0
         for t in tl:
             el += np.log2(t) / np.log2(2**(n-(l+1)) + 1)
         e.append(el / pl)
+        try:
+            assert(e[-1] <= 1)
+        except AssertionError:
+            print(times)
+            print(e)
+            assert(False)
     return e
 
 
-def get_multilevel_intertwined_endogamy(times):
-    n = len(times)
+def get_multilevel_intertwined_endogamy(times, gates):
+    n = len(times) - 1
     e = []
-    pl = 1
-    for i in range(len(times)):
-        tl = times[i]
-        pl_ = len(tl) + 1
+
+    for i in range(1,n+1):
+
+        l = n - i
+        tl = times[i-1]
+        pl = gates[i]
+        pl_ = gates[i-1]
         el = 0
         for t in tl:
-            el += np.log2(t) / np.log2(pl_)
+            el += np.log2(t) / np.log2(2*pl_)
         e.append(el / pl)
-        pl = pl_
+        try:
+            assert(e[-1] <= 1)
+        except AssertionError:
+            print(times)
+            print(tl, pl, pl_, len(times[i]), len(times[i-1]))
+            print(e)
+            assert False
     return e
 
 
@@ -80,7 +97,8 @@ def add_ml_intertw_endogamy_vector_column(df):
 
     for index, row in df.iterrows():
         vl = get_multilevel_intertwined_endogamy(
-            ast.literal_eval(row['times_vector']))
+            ast.literal_eval(row['times_vector']),
+            ast.literal_eval(row['gates_vector']))
         new_column.append(vl)
     df['multilevel_intertwined_endogamy'] = new_column
 
@@ -88,7 +106,7 @@ def add_ml_intertw_endogamy_vector_column(df):
 def generate_ml_endogamy_csv(in_filename, out_filename):
     file_path = get_path_file(in_filename)
     df = pd.read_csv(file_path, sep=';')
-    print('file readed')
+    print(in_filename+' readed')
     add_repr_endogamy(df)
     print('repr column generated')
     add_ml_endogamy_vector_column(df)
@@ -123,7 +141,7 @@ def direct_collapse_endogamy(np_list):
     elif n == 1:
         return np_list[0]
     else:
-        vd = np.array([2**i for i in range(n-1,-1,-1)])
+        vd = np.array([2**i for i in range(0,n)])
         vd = vd / (2**n - 1)
         return np.dot(np_list, vd)
 
@@ -136,16 +154,21 @@ def inverse_collapse_endogamy(np_list):
     elif n == 1:
         return np_list[0]
     else:
-        vd = np.array([2**i for i in range(0, n)])
+        vd = np.array([2**(n-i-1) for i in range(0, n)])
         vd = vd / (2**n - 1)
+        assert(np.sum(vd)==1)
+        try:
+            assert(np.max(np_list) <= 1)
+        except AssertionError:
+            print(np_list)
+            assert(False)
         return np.dot(np_list, vd)
 
 
 def bi_intertwined_endogamy(np_list, gate_list):
     if len(np_list) == 0:
         return 1
-    gate_list = gate_list[1:]
-    gate_list = np.append(gate_list, 1)
+    gate_list = gate_list[:-1]
     s = np.sum(gate_list)
     gate_list = gate_list / s
     return np.dot(np_list,gate_list)
@@ -183,17 +206,15 @@ def generate_all_endogamies(df):
         mli = np.array(
             ast.literal_eval(row['multilevel_intertwined_endogamy']))
         gates = np.array(
-            ast.literal_eval(row['gates_vector']))
-        try:
-            mince = minimum_collapse_endogamy(ml)
-            maxce = maximum_collapse_endogamy(ml)
-            dce = direct_collapse_endogamy(ml)
-            ice = inverse_collapse_endogamy(ml)
-            dcei = direct_collapse_endogamy(mli)
-            icei = inverse_collapse_endogamy(mli)
-            biei = bi_intertwined_endogamy(mli,gates)
-        except ValueError:
-            print(ml, mli, gates)
+        ast.literal_eval(row['gates_vector']))
+        mince = minimum_collapse_endogamy(ml)
+        maxce = maximum_collapse_endogamy(ml)
+        dce = direct_collapse_endogamy(ml)
+        ice = inverse_collapse_endogamy(ml)
+        dcei = direct_collapse_endogamy(mli)
+        icei = inverse_collapse_endogamy(mli)
+        biei = bi_intertwined_endogamy(mli,gates)
+
         mincel.append(mince)
         maxcel.append(maxce)
         dcel.append(dce)
@@ -212,35 +233,46 @@ def generate_all_endogamies(df):
 
 
 
+def generate_all(subfolder):
+    generate_ml_endogamy_csv(subfolder+'id.csv', subfolder+'ml_endogamy.csv')
+    df = load_ml_endogamy_csv(subfolder+'ml_endogamy.csv')
+    generate_all_endogamies(df)
+    df = df.loc[:, df.columns.isin(['id', 'biintertwined_collapse_endogamy',
+                                    'inverse_intertwined_collapse_endogamy',
+                                    'direct_intertwined_collapse_endogamy',
+                                    'inverse_collapse_endogamy',
+                                    'direct_collapse_endogamy',
+                                    'maximum_collapse_endogamy',
+                                    'minimum_collapse_endogamy',
+                                    'representation_endogamy'])].copy()
+    file_path = get_path_file('endogamy.csv', subfolder)
+    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
 
 
 
 if __name__ == "__main__":
     warnings.filterwarnings("error")
-    generate_ml_endogamy_csv('id_gate_vector.csv','ml_endogamy.csv')
-    df = load_ml_endogamy_csv('ml_endogamy.csv')
-    generate_all_endogamies(df)
-    df = df.loc[:, df.columns.isin(['id', 'biintertwined_collapse_endogamy',
-                                    'inverse_intertwined_collapse_endogamy',
-                                    'direct_intertwined_collapse_endogamy',
-                                    'inverse_collapse_endogamy',
-                                    'direct_collapse_endogamy',
-                                    'maximum_collapse_endogamy',
-                                    'minimum_collapse_endogamy',
-                                    'representation_endogamy'])].copy()
-    file_path = get_path_file('endogamy.csv')
-    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
+    generate_all('database/')
+    generate_all('diamond/')
+    generate_all('willow_diamond/')
+    generate_all('')
 
-    generate_ml_endogamy_csv('database/id.csv', 'database/prod_ml_endogamy.csv')
-    df = load_ml_endogamy_csv('database/prod_ml_endogamy.csv')
-    generate_all_endogamies(df)
-    df = df.loc[:, df.columns.isin(['id', 'biintertwined_collapse_endogamy',
-                                    'inverse_intertwined_collapse_endogamy',
-                                    'direct_intertwined_collapse_endogamy',
-                                    'inverse_collapse_endogamy',
-                                    'direct_collapse_endogamy',
-                                    'maximum_collapse_endogamy',
-                                    'minimum_collapse_endogamy',
-                                    'representation_endogamy'])].copy()
-    file_path = get_path_file('database/prod_endogamy.csv')
-    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
+
+
+
+    # for i in range(0,10):
+    #     generate_ml_endogamy_csv('database/id_gate_vector'+str(i)+'.csv',
+    #                             'database/ml_endogamy'+str(i)+'.csv')
+    # for i in range(0,10):
+    #     df = load_ml_endogamy_csv('diamond/ml_endogamy'+str(i)+'.csv')
+    #     generate_all_endogamies(df)
+    #     df = df.loc[:, df.columns.isin(['id', 'biintertwined_collapse_endogamy',
+    #                                     'inverse_intertwined_collapse_endogamy',
+    #                                     'direct_intertwined_collapse_endogamy',
+    #                                     'inverse_collapse_endogamy',
+    #                                     'direct_collapse_endogamy',
+    #                                     'maximum_collapse_endogamy',
+    #                                     'minimum_collapse_endogamy',
+    #                                     'representation_endogamy'])].copy()
+    #     file_path = get_path_file('diamond/endogamy'+str(i)+'.csv')
+    #     df.to_csv(file_path, header=(i==0), index=False, encoding='utf-8', sep=";")

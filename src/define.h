@@ -20,7 +20,7 @@
 #define USEFUL_PRINTING
 #define LOG_FILENAME "../files/log/log_file.log"
 #define PROD_BITS 5
-#define INPUT_SIZE 1
+#define INPUT_SIZE 5
 #define FULL_INPUT_SIZE 2*INPUT_SIZE
 #if INPUT_SIZE == 1
 	#define PRODUCTION_MODE

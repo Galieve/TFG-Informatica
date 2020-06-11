@@ -99,7 +99,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_main_OBJECTS = main.$(OBJEXT) nvwa/debug_new.$(OBJEXT)
+am_main_OBJECTS = main.$(OBJEXT) nvwa/nvwa/debug_new.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_DEPENDENCIES = dispatch/libdispatch.a function/libfunction.a \
 	statistics/libstatistics.a
@@ -319,7 +319,7 @@ AM_LDFLAGS =
 SUBDIRS = function dispatch statistics
 
 # .
-main_SOURCES = main.cpp define.h nvwa/debug_new.h nvwa/debug_new.cpp
+main_SOURCES = main.cpp define.h nvwa/nvwa/debug_new.h nvwa/nvwa/debug_new.cpp
 main_LDADD = dispatch/libdispatch.a \
 function/libfunction.a \
 statistics/libstatistics.a
@@ -399,14 +399,14 @@ uninstall-binPROGRAMS:
 
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
-nvwa/$(am__dirstamp):
-	@$(MKDIR_P) nvwa
-	@: > nvwa/$(am__dirstamp)
-nvwa/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) nvwa/$(DEPDIR)
-	@: > nvwa/$(DEPDIR)/$(am__dirstamp)
-nvwa/debug_new.$(OBJEXT): nvwa/$(am__dirstamp) \
-	nvwa/$(DEPDIR)/$(am__dirstamp)
+nvwa/nvwa/$(am__dirstamp):
+	@$(MKDIR_P) nvwa/nvwa
+	@: > nvwa/nvwa/$(am__dirstamp)
+nvwa/nvwa/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) nvwa/nvwa/$(DEPDIR)
+	@: > nvwa/nvwa/$(DEPDIR)/$(am__dirstamp)
+nvwa/nvwa/debug_new.$(OBJEXT): nvwa/nvwa/$(am__dirstamp) \
+	nvwa/nvwa/$(DEPDIR)/$(am__dirstamp)
 
 main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) $(EXTRA_main_DEPENDENCIES) 
 	@rm -f main$(EXEEXT)
@@ -414,13 +414,13 @@ main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) $(EXTRA_main_DEPENDENCIES)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
-	-rm -f nvwa/*.$(OBJEXT)
+	-rm -f nvwa/nvwa/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
 include ./$(DEPDIR)/main.Po
-include nvwa/$(DEPDIR)/debug_new.Po
+include nvwa/nvwa/$(DEPDIR)/debug_new.Po
 
 .cpp.o:
 	$(AM_V_CXX)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -626,8 +626,8 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-rm -f nvwa/$(DEPDIR)/$(am__dirstamp)
-	-rm -f nvwa/$(am__dirstamp)
+	-rm -f nvwa/nvwa/$(DEPDIR)/$(am__dirstamp)
+	-rm -f nvwa/nvwa/$(am__dirstamp)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -637,7 +637,7 @@ clean: clean-recursive
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-recursive
-	-rm -rf ./$(DEPDIR) nvwa/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) nvwa/nvwa/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -683,7 +683,7 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-recursive
-	-rm -rf ./$(DEPDIR) nvwa/$(DEPDIR)
+	-rm -rf ./$(DEPDIR) nvwa/nvwa/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

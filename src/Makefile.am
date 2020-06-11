@@ -7,7 +7,7 @@ SUBDIRS = function dispatch statistics
 bin_PROGRAMS = main
 
 # .
-main_SOURCES = main.cpp define.h nvwa/debug_new.h nvwa/debug_new.cpp
+main_SOURCES = main.cpp define.h nvwa/nvwa/debug_new.h nvwa/nvwa/debug_new.cpp
 
 main_LDADD = dispatch/libdispatch.a \
 function/libfunction.a \

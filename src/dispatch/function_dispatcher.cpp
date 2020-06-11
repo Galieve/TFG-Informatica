@@ -10,7 +10,7 @@ void function_dispatcher::evaluate(std::size_t i, const std::shared_ptr<vvnode_i
         std::size_t input_size){
 
 #ifndef PRODUCTION_MODE            
-    function f = function::build(*v, input_size);
+    function f = function::build(*v, fg->get_size(), input_size);
     f.evaluate_all();
     std::pair<std::unique_ptr<function>, std::unique_ptr<vvnode_info>>
         p = std::make_pair(std::make_unique<function>(f),

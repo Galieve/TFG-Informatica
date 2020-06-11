@@ -70,6 +70,7 @@ def calculate_lambda_thresholds(df):
             ast.literal_eval(row['multilevel_intertwined_endogamy']))
         gates = np.array(
             ast.literal_eval(row['gates_vector']))
+        gates = gates[:-1]
         n = len(mli)
         if n == 0:
             assert False
@@ -94,18 +95,18 @@ def calculate_lambda_thresholds(df):
 
 if __name__ == "__main__":
     warnings.filterwarnings("error")
-    file_path = get_path_file('ml_endogamy.csv')
-    df = pd.read_csv(file_path, sep=';')
-    df = calculate_lambda_thresholds(df)
-    df = df.loc[:, df.columns.isin(['id', 'direct_inverse_lambda_threshold',
-                                    'minimum_maximum_lambda_threshold',
-                                    'direct_inverse_intertwined_lambda_threshold',
-                                    'minimum_maximum_intertwined_lambda_threshold',
-                                    'biintertwined_lambda_threshold'])].copy()
-    file_path = get_path_file('lambda_threshold.csv')
-    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
+    # file_path = get_path_file('ml_endogamy.csv')
+    # df = pd.read_csv(file_path, sep=';')
+    # df = calculate_lambda_thresholds(df)
+    # df = df.loc[:, df.columns.isin(['id', 'direct_inverse_lambda_threshold',
+    #                                 'minimum_maximum_lambda_threshold',
+    #                                 'direct_inverse_intertwined_lambda_threshold',
+    #                                 'minimum_maximum_intertwined_lambda_threshold',
+    #                                 'biintertwined_lambda_threshold'])].copy()
+    # file_path = get_path_file('lambda_threshold.csv')
+    # df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
 
-    file_path = get_path_file('prod_ml_endogamy.csv', 'database/')
+    file_path = get_path_file('ml_endogamy.csv', 'database/')
     df = pd.read_csv(file_path, sep=';')
     df = calculate_lambda_thresholds(df)
     df = df.loc[:, df.columns.isin(['id', 'direct_inverse_lambda_threshold',

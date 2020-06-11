@@ -19,7 +19,7 @@
 #include "statistics/statistics.h"
 #include "function/circuit.h"
 //https://github.com/adah1972/nvwa
-#include "nvwa/debug_new.h"
+#include "nvwa/nvwa/debug_new.h"
 #ifndef DEFINE_H
     #include "define.h"
 #endif

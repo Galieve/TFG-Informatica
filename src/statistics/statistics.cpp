@@ -167,7 +167,9 @@ void statistics::save_log(const function_generator &fg){
         log_file << "nullptr\n";
     else
         log_file << *fg.get_current() << "\n";
+#ifdef PRODUCTION_MODE
     flush_data();
+#endif
     
 }
 
