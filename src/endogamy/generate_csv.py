@@ -4,8 +4,6 @@ import sys
 import pandas as pd
 
 
-
-
 def generate_database():
 
     file_id = 16

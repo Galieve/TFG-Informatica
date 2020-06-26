@@ -93,6 +93,18 @@ def calculate_lambda_thresholds(df):
     return df
 
 
+def generate_lambda_threshold_files(subfolder):
+    file_path = get_path_file('ml_endogamy.csv', subfolder)
+    df = pd.read_csv(file_path, sep=';')
+    df = calculate_lambda_thresholds(df)
+    df = df.loc[:, df.columns.isin(['id', 'direct_inverse_lambda_threshold',
+                                    'minimum_maximum_lambda_threshold',
+                                    'direct_inverse_intertwined_lambda_threshold',
+                                    'minimum_maximum_intertwined_lambda_threshold',
+                                    'biintertwined_lambda_threshold'])].copy()
+    file_path = get_path_file('lambda_threshold.csv', subfolder)
+    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
+
 if __name__ == "__main__":
     warnings.filterwarnings("error")
     # file_path = get_path_file('ml_endogamy.csv')
@@ -105,14 +117,8 @@ if __name__ == "__main__":
     #                                 'biintertwined_lambda_threshold'])].copy()
     # file_path = get_path_file('lambda_threshold.csv')
     # df.to_csv(file_path, index=False, encoding='utf-8', sep=";")
+    generate_lambda_threshold_files('.')
+    generate_lambda_threshold_files('diamond/')
+    generate_lambda_threshold_files('willow_diamond/')
+    generate_lambda_threshold_files('database/')
 
-    file_path = get_path_file('ml_endogamy.csv', 'database/')
-    df = pd.read_csv(file_path, sep=';')
-    df = calculate_lambda_thresholds(df)
-    df = df.loc[:, df.columns.isin(['id', 'direct_inverse_lambda_threshold',
-                                    'minimum_maximum_lambda_threshold',
-                                    'direct_inverse_intertwined_lambda_threshold',
-                                    'minimum_maximum_intertwined_lambda_threshold',
-                                    'biintertwined_lambda_threshold'])].copy()
-    file_path = get_path_file('lambda_threshold.csv', 'database/')
-    df.to_csv(file_path, index=False, encoding='utf-8', sep=";")

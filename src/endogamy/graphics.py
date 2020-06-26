@@ -109,7 +109,7 @@ def generate_all_graphics(csvname, subfolder="", subtitle="", suffix=""):
         # id_name_plot(df, col, gr, subfolder + im, subtitle)
         print(im + " finished")
 
-    show_correlation(df, subfolder + "Correlación entre endogamias" + suffix + ".png", subtitle)
+    show_correlation(df, 'eps/between/' + "Correlación entre endogamias" + suffix + ".eps", subtitle)
 
 
 def plot_lambda_threshold(df, column_name, graphic_name, image_name):
@@ -118,6 +118,7 @@ def plot_lambda_threshold(df, column_name, graphic_name, image_name):
     x = []
     y0 = []
     y1 = []
+    z = []
     for index, row in df.iterrows():
         if index % 1e3 == 0:
             print(index, f'{100 * index / len(df.index):.2f}')
@@ -128,28 +129,37 @@ def plot_lambda_threshold(df, column_name, graphic_name, image_name):
         y1.append(lt[1])
 
         lines.append([(x[-1], y0[-1]), (x[-1], y1[-1])])
+        z.append(np.abs(y1[-1]-y0[-1]))
 
-    linecoll = matcoll.LineCollection(lines, colors='k')
+    z = np.array(z)
+
+    linecoll = matcoll.LineCollection(lines, array=z, cmap=plt.cm.Spectral,
+                                      linewidths=0.5)
 
     fig, ax = plt.subplots()
 
     print('linecoll created')
-    plt.scatter(x, y0, s=0.05, c='r')
-    plt.scatter(x, y1, s=0.05, c='b')
+    # plt.scatter(x, y0, s=0.05, c='r')
+    # plt.scatter(x, y1, s=0.05, c='b')
 
     # print('dots plotted')
+    ax.set_xlabel('Id de la función en decimal')
+    ax.set_ylabel('Valor de la endogamia')
     ax.add_collection(linecoll)
+    fig.colorbar(linecoll)
     ax.autoscale()
+    ax.set_ylim(0, 1)
+
 
     print('linecoll plotted')
-    plt.title(graphic_name)
+    plt.title(graphic_name, fontsize= 15)
     print('title set in ' + image_name)
     # plt.show()
-    plt.savefig(image_name)
+    plt.savefig(image_name, format='eps')
     print(image_name + ' saved')
 
 
-def generate_all_lambda_threshold(csvname, subfolder):
+def generate_all_lambda_threshold(csvname, subfolder, suffix):
     df = load_csv(csvname, subfolder)
     column_names = ['direct_inverse_lambda_threshold',
                     'minimum_maximum_lambda_threshold',
@@ -161,13 +171,13 @@ def generate_all_lambda_threshold(csvname, subfolder):
                      'Umbral directo-inverso entrelazado',
                      'Umbral máximo-mínimo entrelazado',
                      'Umbral bientrelazado']
-    image_names = ['Umbral directo-inverso.png',
-                   'Umbral máximo-mínimo.png',
-                   'Umbral directo-inverso entrelazado.png',
-                   'Umbral máximo-mínimo entrelazado.png',
-                   'Umbral bientrelazado.png']
+    image_names = ['Umbral directo-inverso',
+                   'Umbral máximo-mínimo',
+                   'Umbral directo-inverso entrelazado',
+                   'Umbral máximo-mínimo entrelazado',
+                   'Umbral bientrelazado']
     for col, gr, im in zip(column_names, graphic_names, image_names):
-        plot_lambda_threshold(df, col, gr, subfolder + im)
+        plot_lambda_threshold(df, col, gr + suffix, 'eps/threshold/' + im + suffix + '.eps')
         print(subfolder + im + " finished")
 
 
@@ -213,7 +223,7 @@ def compare_endogamies(dfc, dfp,
 
     xl, yl = labels
 
-    ax.set_title(graphic_name)
+    ax.set_title(graphic_name, fontsize='large')
     ax.set_xlabel(xl)
     ax.set_ylabel(yl)
 
@@ -233,7 +243,7 @@ def compare_endogamies(dfc, dfp,
 def all_endogamies_comparated(subfolder1, subfolder2, suffix, labels):
     dfc = load_csv('endogamy.csv', subfolder1)
     dfp = load_csv('endogamy.csv', subfolder2)
-    extension = '.png'
+    extension = '.eps'
     column_names = ['representation_endogamy',
                     'maximum_collapse_endogamy',
                     'minimum_collapse_endogamy',
@@ -264,7 +274,7 @@ def all_endogamies_comparated(subfolder1, subfolder2, suffix, labels):
                    ]
 
     for col, gr, im in zip(column_names, graphic_names, image_names):
-        image_path = subfolder2 + im + suffix + extension
+        image_path = 'eps/compare' + im + suffix + extension
         compare_endogamies(dfc, dfp, col, gr, image_path, labels)
         print(image_path + " finished")
 
@@ -366,14 +376,14 @@ def show_correlation(df, image_name, graphic_name):
     # ticks = np.arange(0, len(df.columns), 1)
     # ax.set_xticks(ticks)
     # ax.set_yticks(ticks)
-    ax.set_xticklabels(xlabels)
-    ax.set_yticklabels(ylabels)
+    ax.set_xticklabels(xlabels, fontsize= 12)
+    ax.set_yticklabels(ylabels, fontsize= 12)
     for tick in ax.get_xticklabels():
         tick.set_rotation(20)
 
-    ax.set_title(graphic_name, y=1.1)
+    ax.set_title(graphic_name, y=1.1, fontsize= 30)
 
-    plt.savefig(image_name)
+    plt.savefig(image_name, format='eps')
     plt.clf()
     # sns.set(style="ticks", color_codes=True)
     # g = sns.pairplot(df)
@@ -381,6 +391,11 @@ def show_correlation(df, image_name, graphic_name):
 
 
 if __name__ == "__main__":
+    plt.rc('text', usetex=True)
+    # font = {'family':'serif','size':16}
+    font = {'family': 'serif', 'size': 10, 'serif': ['computer modern roman']}
+    plt.rc('font', **font)
+    plt.rc('legend', **{'fontsize': 12})
     # generate_all_graphics('endogamy.csv', 'willow_diamond/',
     #                       "Circuitos con forma 4-romboidal", ' - 4-romboide')
     # generate_all_graphics('endogamy.csv', 'diamond/',
@@ -390,9 +405,11 @@ if __name__ == "__main__":
     #                       'Circuitos con mínimo número de puertas.',
     #                       ' - Mínimo número de puertas')
     #
-    # # generate_all_lambda_threshold('lambda_threshold.csv',"")
-    # generate_all_lambda_threshold('lambda_threshold.csv','database/')
-    # # generate_all_lambda_threshold('lambda_threshold.csv', 'diamond/')
+    # generate_all_lambda_threshold('lambda_threshold.csv', 'diamond/', ' - Romboides')
+    # generate_all_lambda_threshold('lambda_threshold.csv', 'willow_diamond/', ' - 4-romboides')
+    # generate_all_lambda_threshold('lambda_threshold.csv','database/', ' - Gramáticas')
+    # generate_all_lambda_threshold('lambda_threshold.csv', "", ' - Circuitos mínimos')
+
     # min_dia = 'Valor de la endogamia del circuito mínimo', \
     #           'Valor de la endogamia del circuito romboidal'
     #
@@ -407,16 +424,27 @@ if __name__ == "__main__":
     # all_endogamies_comparated('', 'diamond/', ' - mínimo vs - romboide', min_dia)
     # all_endogamies_comparated('', 'willow_diamond/', ' - mínimo vs 4-romboide', min_4dia)
     # all_endogamies_comparated('', 'database/', ' - mínimo vs gramática', min_gra)
-    generate_graphic_gates('Comparativa tamaño de puertas',
-                           'database/Comparativa tamaño de puertas.png',
-                           'Puertas del circuito mínimo frente a reglas de la gramática.')
+    # generate_graphic_gates('Comparativa tamaño de puertas',
+    #                        'database/Comparativa tamaño de puertas.png',
+    #                        'Puertas del circuito mínimo frente a reglas de la gramática.')
     df1 = load_csv('endogamy.csv', '')
     df2 = load_csv('endogamy.csv', 'database/')
     df3 = load_csv('endogamy.csv', 'diamond/')
     df4 = load_csv('endogamy.csv', 'willow_diamond/')
     frames = [df1, df2, df3, df4]
     df = pd.concat(frames)
-    # show_correlation(df, 'Correlación entre endogamias - Todos los circuitos.png',
-    #                  'Todos los circuitos')
+    show_correlation(df, 'eps/between/Correlación entre endogamias - Todos los circuitos.eps',
+                     'Todos los circuitos')
 
-    # new_correlation_graphics(df, df)
+    # df = df2.copy()
+    # df.drop_duplicates(subset=['id'], keep='first', inplace=True)
+    # print(len(df2.index), len(df.index))
+    #
+    # df = df3.copy()
+    # df.drop_duplicates(subset=['id'], keep='first', inplace=True)
+    # print(len(df3.index), len(df.index))
+    #
+    # df = df4.copy()
+    # df.drop_duplicates(subset=['id'], keep='first', inplace=True)
+    # print(len(df4.index), len(df.index))
+
